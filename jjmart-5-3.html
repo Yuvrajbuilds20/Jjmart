@@ -1,0 +1,2908 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JJ Mart — Groceries & Daily Essentials, Delivered</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  /* Fresh, vibrant grocery palette */
+  --paper: #F7FBF4; --paper-deep: #EAF4E3; --ink: #1A2E1D; --ink-soft: #4A6550;
+  --stamp: #FF5722; --stamp-dark: #E64A19; --moss: #2ECC71; --moss-dark: #27AE60;
+  --gold: #FFB300; --teal: #00BCD4; --purple: #7C4DFF; --pink: #FF4081;
+  --white: #FFFFFF; --line: #C8E6C9; --radius: 14px;
+  --shadow-sm: 0 2px 8px rgba(26,46,29,0.10);
+  --shadow-md: 0 6px 24px rgba(26,46,29,0.13);
+  --shadow-lg: 0 16px 48px rgba(26,46,29,0.16);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(-8deg); }
+  50% { transform: translateY(-8px) rotate(-8deg); }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(46,204,113,0); }
+  100% { transform: scale(0.95); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+@keyframes bounce-in {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; min-height: 100%; overflow-x: hidden; width: 100%; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; cursor: pointer; }
+button { font-family: inherit; cursor: pointer; }
+h1, h2, h3, .display { font-family: 'Nunito', sans-serif; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+.container { max-width: 1240px; margin: 0 auto; padding: 0 20px; width: 100%; box-sizing: border-box; }
+
+/* ---------- Topbar: animated marquee strip ---------- */
+.topbar {
+  background: linear-gradient(90deg, var(--moss-dark), var(--teal), var(--moss-dark));
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+  color: var(--white); font-size: 12.5px; padding: 0; text-align: center;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: 0.01em;
+  overflow: hidden; white-space: nowrap; height: 34px; display: flex; align-items: center;
+}
+.topbar-marquee {
+  display: inline-flex; gap: 0; animation: marquee 22s linear infinite; white-space: nowrap;
+}
+.topbar-marquee span { padding: 0 32px; }
+
+/* ---------- Header ---------- */
+.header {
+  background: var(--white); position: sticky; top: 0; z-index: 50;
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+.header-inner { display: flex; align-items: center; gap: 22px; padding: 14px 20px; flex-wrap: wrap; }
+.logo {
+  font-family: 'Nunito', sans-serif; color: var(--ink); font-size: 26px; font-weight: 900;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap; letter-spacing: -0.03em;
+}
+.logo .logo-icon {
+  width: 36px; height: 36px; background: linear-gradient(135deg, var(--moss), var(--teal));
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 3px 10px rgba(46,204,113,0.35);
+}
+.logo span { color: var(--moss-dark); }
+.logo small {
+  font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 9px; color: var(--white);
+  letter-spacing: 0.06em; background: var(--stamp); padding: 2px 6px; border-radius: 6px;
+  align-self: flex-end; margin-bottom: 4px;
+}
+.search-bar {
+  flex: 1; display: flex; background: var(--paper); border: 2px solid var(--line); border-radius: 50px;
+  overflow: hidden; max-width: 560px; min-width: 200px; transition: border-color .2s, box-shadow .2s;
+}
+.search-bar:focus-within { border-color: var(--moss); box-shadow: 0 0 0 4px rgba(46,204,113,0.12); }
+.search-bar input { flex: 1; border: none; outline: none; padding: 11px 18px; font-size: 14px; font-family: inherit; background: transparent; }
+.search-bar button {
+  background: linear-gradient(135deg, var(--moss), var(--moss-dark)); border: none; padding: 0 22px;
+  color: var(--white); font-size: 16px; border-radius: 0 50px 50px 0; transition: opacity .15s;
+}
+.search-bar button:hover { opacity: 0.88; }
+.header-actions { display: flex; align-items: center; gap: 16px; color: var(--ink); font-size: 13.5px; font-weight: 700; }
+.header-actions a, .header-actions button {
+  background: none; border: none; color: var(--ink-soft); display: flex; align-items: center; gap: 6px;
+  font-weight: 700; font-size: 13.5px; position: relative; transition: color .15s;
+}
+.header-actions a:hover, .header-actions button:hover { color: var(--moss-dark); }
+.cart-badge {
+  background: linear-gradient(135deg, var(--stamp), var(--pink)); color: var(--white); font-size: 10px;
+  font-weight: 800; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center;
+  justify-content: center; position: absolute; top: -8px; right: -10px;
+  animation: bounce-in 0.3s ease-out; box-shadow: 0 2px 6px rgba(255,87,34,0.4);
+}
+
+/* ---------- Category nav: colorful pill tabs ---------- */
+.category-nav { background: var(--white); border-bottom: 1px solid var(--line); overflow-x: auto; }
+.category-nav::-webkit-scrollbar { height: 0; }
+.category-nav-inner { display: flex; gap: 8px; padding: 10px 20px; max-width: 1240px; margin: 0 auto; }
+.category-nav a {
+  color: var(--ink-soft); font-size: 13px; font-weight: 700; padding: 8px 18px; white-space: nowrap;
+  border-radius: 50px; display: inline-block; background: var(--paper);
+  border: 1.5px solid var(--line); transition: all .18s ease;
+}
+.category-nav a:hover { background: var(--paper-deep); border-color: var(--moss); color: var(--moss-dark); transform: translateY(-1px); }
+.category-nav a.active {
+  background: linear-gradient(135deg, var(--moss), var(--moss-dark)); color: var(--white);
+  border-color: transparent; box-shadow: 0 3px 10px rgba(46,204,113,0.35);
+}
+
+/* ---------- Hero: fresh gradient with floating elements ---------- */
+.hero {
+  background: linear-gradient(135deg, #0A3D1F 0%, #1A6B38 40%, #00897B 100%);
+  color: var(--white); padding: 0; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 80% 20%, rgba(255,179,0,0.12) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(0,188,212,0.10) 0%, transparent 50%);
+  pointer-events: none;
+}
+/* Decorative floating blobs */
+.hero::after {
+  content: '🌿';
+  position: absolute; top: -20px; right: 8%; font-size: 120px; opacity: 0.08;
+  animation: float 5s ease-in-out infinite; pointer-events: none;
+}
+.hero-inner {
+  display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 0; align-items: stretch; min-height: 320px;
+  max-width: 1240px; margin: 0 auto; position: relative; z-index: 1;
+}
+.hero-copy { padding: 64px 20px 56px; max-width: 600px; animation: slide-in-up .6s ease-out; }
+.hero-copy .eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px; display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,179,0,0.12); padding: 5px 14px; border-radius: 50px; border: 1px solid rgba(255,179,0,0.25);
+}
+.hero-copy .eyebrow::before { content: '●'; animation: pulse-ring 2s infinite; color: var(--gold); font-size: 8px; }
+.hero h1 { font-size: clamp(32px, 5vw, 56px); color: var(--white); margin: 0 0 18px; font-family: 'Nunito', sans-serif; font-weight: 900; }
+.hero h1 em { color: var(--gold); font-style: italic; }
+.hero p { font-size: 16px; opacity: .85; max-width: 460px; margin: 0 0 32px; line-height: 1.6; }
+.hero-stats { display: flex; gap: 0; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 22px; }
+.hero-stat { padding-right: 28px; margin-right: 28px; border-right: 1px solid rgba(255,255,255,0.15); }
+.hero-stat:last-child { border-right: none; }
+.hero-stat strong { font-family: 'Nunito', sans-serif; font-size: 28px; color: var(--gold); display: block; font-weight: 900; }
+.hero-stat span { font-size: 11.5px; opacity: .7; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.03em; }
+.hero-panel {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+.hero-panel .stamp-mark {
+  width: 160px; height: 160px;
+  background: linear-gradient(135deg, rgba(255,179,0,0.15), rgba(255,179,0,0.05));
+  border: 2.5px solid var(--gold); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  animation: float 4s ease-in-out infinite; color: var(--gold); font-family: 'JetBrains Mono', monospace;
+  text-align: center; box-shadow: 0 0 40px rgba(255,179,0,0.2), inset 0 0 30px rgba(255,179,0,0.05);
+}
+.hero-panel .stamp-mark strong { font-size: 24px; font-family: 'Nunito', sans-serif; font-weight: 900; display: block; color: var(--white); }
+.hero-panel .stamp-mark span { font-size: 9px; letter-spacing: 0.12em; color: rgba(255,255,255,0.75); }
+/* Orbiting emoji decorations */
+.hero-panel .orb1, .hero-panel .orb2, .hero-panel .orb3 {
+  position: absolute; font-size: 28px; animation: float 3s ease-in-out infinite;
+}
+.hero-panel .orb1 { top: 20%; left: 15%; animation-delay: 0s; }
+.hero-panel .orb2 { top: 65%; left: 65%; animation-delay: 1s; }
+.hero-panel .orb3 { top: 20%; left: 65%; animation-delay: 2s; }
+@media (max-width: 760px) {
+  .hero-inner { grid-template-columns: 1fr; min-height: 0; }
+  .hero-panel { display: none; }
+  .hero-copy { padding: 40px 20px 36px; }
+}
+
+/* ---------- Sections ---------- */
+.section { padding: 44px 0; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; gap: 12px; }
+.section-head h2 { font-size: 24px; color: var(--ink); display: flex; align-items: center; gap: 10px; font-family: 'Nunito', sans-serif; font-weight: 900; }
+.section-head h2 .tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--white);
+  background: linear-gradient(135deg, var(--stamp), var(--pink));
+  padding: 3px 9px; border-radius: 50px; font-weight: 700; letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(255,87,34,0.3);
+}
+.section-head a { color: var(--moss-dark); font-weight: 700; font-size: 13.5px; }
+.section-head a:hover { text-decoration: underline; }
+
+/* ---------- Category grid ---------- */
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; }
+.cat-card {
+  background: var(--white); border: 1.5px solid var(--line); border-radius: 20px; padding: 20px 10px;
+  text-align: center; transition: transform .2s ease, box-shadow .2s ease, border-color .2s; position: relative;
+  cursor: pointer;
+}
+.cat-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: var(--shadow-md); border-color: var(--moss);
+}
+.cat-card:hover .icon { animation: wiggle 0.4s ease; }
+.cat-card .icon { font-size: 32px; display: block; margin-bottom: 10px; transition: transform .2s; }
+.cat-card .name { font-size: 12px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+
+/* ---------- Product grid & card ---------- */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
+.product-card {
+  background: var(--white); border: 1.5px solid var(--line); border-radius: 20px; overflow: hidden;
+  display: flex; flex-direction: column; position: relative;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s;
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md); border-color: var(--moss);
+}
+.product-card img {
+  width: 100%; aspect-ratio: 1/1; object-fit: contain;
+  background: linear-gradient(135deg, var(--paper), var(--paper-deep));
+  border-bottom: 1px solid var(--line); padding: 12px;
+  transition: transform .3s ease;
+}
+.product-card:hover img { transform: scale(1.06); }
+.product-body { padding: 14px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.product-brand { font-size: 10px; color: var(--moss-dark); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.product-name { font-size: 14px; font-weight: 700; line-height: 1.3; font-family: 'Nunito', sans-serif; color: var(--ink); }
+.product-unit { font-size: 11.5px; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; }
+.product-rating {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: linear-gradient(135deg, var(--moss), var(--moss-dark));
+  color: var(--white); font-size: 10.5px; font-weight: 700; padding: 3px 8px;
+  border-radius: 50px; width: fit-content;
+}
+
+/* Signature element: vibrant price tag */
+.price-tag { display: flex; align-items: baseline; gap: 8px; margin-top: auto; position: relative; flex-wrap: wrap; }
+.price-now {
+  font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 900; color: var(--stamp);
+  display: inline-block;
+}
+.price-now::before { content: '₹'; font-size: 0.72em; margin-right: 1px; opacity: 0.85; }
+.price-mrp { font-size: 11.5px; color: var(--ink-soft); text-decoration: line-through; font-family: 'JetBrains Mono', monospace; }
+.price-off {
+  font-size: 10px; color: var(--white); font-weight: 800;
+  background: linear-gradient(135deg, var(--moss), var(--teal));
+  padding: 2px 8px; border-radius: 50px;
+}
+
+.add-btn {
+  background: linear-gradient(135deg, var(--moss), var(--moss-dark));
+  border: none; color: var(--white); font-weight: 800; font-size: 12.5px;
+  padding: 10px 10px; border-radius: 12px; width: 100%; margin-top: 10px;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s;
+  box-shadow: 0 3px 12px rgba(46,204,113,0.35);
+}
+.add-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(46,204,113,0.45); }
+.add-btn:active { transform: translateY(0); }
+.add-btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+.qty-stepper {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, var(--moss), var(--moss-dark));
+  border-radius: 12px; width: 100%; margin-top: 10px; overflow: hidden;
+}
+.qty-stepper button { background: none; border: none; color: var(--white); font-weight: 900; font-size: 18px; padding: 7px 16px; }
+.qty-stepper button:hover { background: rgba(0,0,0,0.12); }
+.qty-stepper span { color: var(--white); font-weight: 800; font-size: 14px; }
+.stock-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: linear-gradient(135deg, var(--stamp), var(--pink));
+  color: var(--white); font-size: 9.5px;
+  font-weight: 800; padding: 4px 9px; border-radius: 50px; z-index: 2;
+  letter-spacing: 0.03em; box-shadow: 0 2px 8px rgba(255,87,34,0.4);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none;
+  border-radius: 50px; font-weight: 800; font-size: 14px; padding: 13px 28px;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--stamp), var(--pink)); color: var(--white);
+  box-shadow: 0 4px 16px rgba(255,87,34,0.35);
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(255,87,34,0.45); }
+.btn-secondary {
+  background: linear-gradient(135deg, var(--ink), #2D5A36); color: var(--white);
+  box-shadow: 0 4px 16px rgba(26,46,29,0.25);
+}
+.btn-secondary:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,46,29,0.35); }
+.btn-outline {
+  background: transparent; border: 2px solid var(--moss); color: var(--moss-dark);
+}
+.btn-outline:hover { background: var(--moss); color: var(--white); transform: translateY(-2px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+/* ---------- Footer ---------- */
+.footer {
+  background: linear-gradient(135deg, #0A3D1F 0%, #1A6B38 100%);
+  color: var(--white); padding: 52px 0 24px; margin-top: 40px;
+  border-top: none; position: relative; overflow: hidden;
+}
+.footer::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 90% 50%, rgba(0,188,212,0.08), transparent 60%);
+  pointer-events: none;
+}
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 28px; margin-bottom: 36px; position: relative; }
+.footer-grid h4 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--gold); margin-bottom: 14px;
+  font-weight: 800;
+}
+.footer-grid a, .footer-grid p { display: block; font-size: 13.5px; color: rgba(255,255,255,0.78); margin-bottom: 9px; transition: color .15s; }
+.footer-grid a:hover { color: var(--white); padding-left: 4px; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,.12); padding-top: 20px; font-size: 11.5px;
+  opacity: .55; text-align: center; position: relative;
+}
+
+/* ---------- Forms ---------- */
+.form-card { background: var(--white); border-radius: 24px; border: 1.5px solid var(--line); padding: 36px; max-width: 420px; margin: 44px auto; box-shadow: var(--shadow-md); }
+.form-card h2 { color: var(--ink); margin-bottom: 6px; font-size: 26px; font-family: 'Nunito', sans-serif; font-weight: 900; }
+.form-card .sub { color: var(--ink-soft); font-size: 13.5px; margin-bottom: 24px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.03em; color: var(--ink-soft); }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 12px 16px; border: 1.5px solid var(--line); border-radius: 12px; font-size: 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif; background: var(--paper); transition: border-color .18s, box-shadow .18s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--moss); outline: none; box-shadow: 0 0 0 4px rgba(46,204,113,0.12);
+}
+.form-error { background: #FFF0EE; color: var(--stamp-dark); border: 1.5px solid rgba(255,87,34,0.3); padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; }
+.form-success { background: #F0FDF4; color: var(--moss-dark); border: 1.5px solid rgba(46,204,113,0.3); padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; }
+.form-switch { text-align: center; margin-top: 18px; font-size: 13px; color: var(--ink-soft); }
+.form-switch button { background: none; border: none; color: var(--moss-dark); font-weight: 800; }
+
+/* ---------- Page header ---------- */
+.page-head { padding: 30px 0 10px; }
+.page-head h1 { font-size: 28px; color: var(--ink); font-family: 'Nunito', sans-serif; font-weight: 900; }
+.breadcrumb { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
+.breadcrumb a:hover { color: var(--moss-dark); }
+
+/* ---------- Cart page ---------- */
+.cart-layout { display: grid; grid-template-columns: 1fr 350px; gap: 24px; align-items: start; }
+@media (max-width: 800px) { .cart-layout { grid-template-columns: 1fr; } }
+.cart-line {
+  display: flex; gap: 16px; background: var(--white); border: 1.5px solid var(--line); border-radius: 18px;
+  padding: 16px; margin-bottom: 12px; align-items: center; transition: box-shadow .2s;
+}
+.cart-line:hover { box-shadow: var(--shadow-sm); }
+.cart-line img { width: 68px; height: 68px; object-fit: cover; border-radius: 12px; background: var(--paper-deep); border: 1px solid var(--line); }
+.cart-line-info { flex: 1; }
+.cart-line-info .name { font-weight: 700; font-size: 14px; font-family: 'Nunito', sans-serif; }
+.cart-line-info .unit { font-size: 11.5px; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; }
+.cart-line-price { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 17px; color: var(--stamp); min-width: 68px; text-align: right; }
+.remove-link { background: none; border: none; color: var(--ink-soft); font-size: 11.5px; text-decoration: underline; margin-top: 4px; }
+.remove-link:hover { color: var(--stamp); }
+
+.summary-card { background: var(--white); border: 1.5px solid var(--line); border-radius: 22px; padding: 22px; box-shadow: var(--shadow-sm); }
+.summary-card h3 { font-size: 18px; color: var(--ink); margin-bottom: 18px; font-family: 'Nunito', sans-serif; font-weight: 900; }
+.summary-row { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 10px; }
+.summary-row.total { font-weight: 800; font-size: 18px; border-top: 1px dashed var(--line); padding-top: 14px; margin-top: 6px; font-family: 'Nunito', sans-serif; }
+.summary-row .free { color: var(--moss-dark); font-weight: 800; }
+
+.empty-state { text-align: center; padding: 70px 20px; color: var(--ink-soft); }
+.empty-state .emoji { font-size: 56px; display: block; margin-bottom: 14px; animation: float 3s ease-in-out infinite; }
+.empty-state h3 { color: var(--ink); margin-bottom: 10px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 22px; }
+
+/* ---------- Product detail ---------- */
+.pdp-image { background: var(--white); border: 1.5px solid var(--line); border-radius: 22px; padding: 22px; box-shadow: var(--shadow-sm); }
+.pdp-image img { width: 100%; height: 300px; object-fit: cover; border-radius: 14px; }
+
+/* ---------- Order ---------- */
+.order-card { background: var(--white); border: 1.5px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+.order-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.order-status { font-size: 11.5px; font-weight: 800; padding: 5px 12px; border-radius: 50px; text-transform: capitalize; }
+.status-placed { background: #FFF8E7; color: #E65100; }
+.status-packed { background: #E3F4FB; color: #0277BD; }
+.status-shipped { background: #F3E8FF; color: #6A1B9A; }
+.status-delivered { background: #F0FDF4; color: var(--moss-dark); }
+.status-cancelled { background: #FFF0EE; color: var(--stamp-dark); }
+.order-item-row { display: flex; justify-content: space-between; font-size: 13.5px; padding: 6px 0; }
+.order-item-row .muted { color: var(--ink-soft); }
+
+/* ---------- Admin ---------- */
+.admin-layout { display: grid; grid-template-columns: 200px 1fr; gap: 20px; align-items: start; min-width: 0; }
+.admin-layout > div { min-width: 0; }
+.admin-nav { display: flex; flex-direction: column; gap: 6px; background: var(--white); border: 1.5px solid var(--line); border-radius: 20px; padding: 12px; height: fit-content; box-shadow: var(--shadow-sm); }
+.admin-nav button { text-align: left; background: none; border: none; padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--ink); }
+.admin-nav button:hover { background: var(--paper); }
+.admin-nav button.active { background: linear-gradient(135deg, var(--moss), var(--moss-dark)); color: var(--white); }
+.admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; min-width: 0; max-width: 100%; }
+.admin-table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: 16px; overflow: hidden; border: 1.5px solid var(--line); min-width: 560px; }
+.admin-table th { background: var(--paper-deep); text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; padding: 10px 12px; color: var(--ink-soft); white-space: nowrap; font-weight: 800; }
+.admin-table td { padding: 10px 12px; font-size: 13px; border-top: 1px solid var(--line); vertical-align: middle; }
+.admin-table img { width: 36px; height: 36px; object-fit: cover; border-radius: 8px; }
+.icon-btn { background: none; border: none; color: var(--ink-soft); font-size: 12px; font-weight: 700; margin-right: 8px; padding: 5px 4px; border-radius: 8px; }
+.icon-btn:hover { color: var(--stamp); background: #FFF0EE; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,46,29,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+.modal-card { background: var(--white); border-radius: 24px; padding: 30px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+
+/* ---------- Admin: image upload dropzone ---------- */
+.img-dropzone {
+  width: 100%; background: var(--paper); border: 2px dashed var(--line); border-radius: 16px;
+  padding: 32px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.img-dropzone:hover, .img-dropzone.drag-over { border-color: var(--moss); background: var(--paper-deep); }
+.img-dropzone-icon { font-size: 30px; }
+.img-dropzone-text { font-size: 13px; font-weight: 700; color: var(--ink); }
+.img-dropzone-sub { font-size: 11px; color: var(--ink-soft); }
+.img-upload-preview { display: flex; gap: 12px; align-items: center; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 12px; }
+.img-upload-preview img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); flex-shrink: 0; }
+.img-upload-preview-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.img-upload-preview-actions .btn { padding: 7px 16px; font-size: 11.5px; }
+
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: linear-gradient(135deg, var(--ink), #2D5A36);
+  color: var(--white); padding: 14px 22px;
+  border-radius: 16px; font-size: 13.5px; font-weight: 700;
+  box-shadow: var(--shadow-lg); z-index: 200;
+  animation: slide-in-up 0.3s ease-out;
+}
+.spinner-wrap { display: flex; justify-content: center; padding: 70px 0; color: var(--ink-soft); font-size: 13px; }
+.badge-admin { background: linear-gradient(135deg, var(--stamp), var(--pink)); color: white; font-size: 10px; padding: 2px 8px; border-radius: 50px; margin-left: 6px; font-weight: 800; }
+.hidden { display: none !important; }
+.sort-row { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+.sort-btn { padding: 7px 16px; font-size: 11.5px; background: var(--white); color: var(--ink-soft); border: 1.5px solid var(--line); border-radius: 50px; font-weight: 700; transition: all .15s; }
+.sort-btn:hover { border-color: var(--moss); color: var(--moss-dark); }
+.sort-btn.active { background: linear-gradient(135deg, var(--moss), var(--moss-dark)); color: var(--white); border-color: transparent; }
+
+
+/* ---------- Order tracking timeline ---------- */
+.order-timeline { display: flex; align-items: flex-start; gap: 0; margin: 16px 0 6px; position: relative; }
+.order-timeline::before {
+  content: ''; position: absolute; top: 14px; left: 14px;
+  right: 14px; height: 3px;
+  background: var(--line); z-index: 0;
+}
+.ot-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; z-index: 1; }
+.ot-dot {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--paper);
+  border: 3px solid var(--line); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: all .25s; flex-shrink: 0;
+}
+.ot-step.done .ot-dot { background: var(--moss); border-color: var(--moss); color: var(--white); }
+.ot-step.active .ot-dot { background: var(--gold); border-color: var(--gold); color: var(--ink); box-shadow: 0 0 0 4px rgba(255,179,0,0.2); animation: pulse-ring 2s infinite; }
+.ot-step.cancelled .ot-dot { background: var(--stamp); border-color: var(--stamp); color: var(--white); }
+.ot-label { font-size: 10px; font-weight: 700; color: var(--ink-soft); text-align: center; line-height: 1.3; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.02em; }
+.ot-step.done .ot-label, .ot-step.active .ot-label { color: var(--ink); }
+.ot-step.active .ot-label { color: var(--gold); }
+.ot-step.cancelled .ot-label { color: var(--stamp-dark); }
+
+/* ---------- Store Closed Banner ---------- */
+.store-closed-banner {
+  background: linear-gradient(135deg, #B71C1C, #E53935);
+  color: #fff; text-align: center; padding: 14px 20px;
+  font-weight: 800; font-size: 14px; display: flex; align-items: center;
+  justify-content: center; gap: 10px; flex-wrap: wrap;
+}
+.store-closed-banner .closed-icon { font-size: 20px; animation: wiggle 2s ease-in-out infinite; }
+.store-closed-banner .closed-time { opacity: .85; font-size: 12.5px; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+
+/* ---------- Pincode check styles ---------- */
+.pincode-check-wrap { display: flex; gap: 8px; align-items: center; margin: 8px 0 4px; }
+.pincode-check-wrap input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 14px; font-family: inherit; background: var(--paper); transition: border-color .18s; }
+.pincode-check-wrap input:focus { border-color: var(--moss); outline: none; box-shadow: 0 0 0 4px rgba(46,204,113,0.12); }
+.pincode-check-wrap button { padding: 10px 18px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--moss), var(--moss-dark)); color: #fff; font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.pincode-result { font-size: 12.5px; font-weight: 700; margin-top: 6px; padding: 7px 13px; border-radius: 8px; display: inline-block; }
+.pincode-result.ok { background: #F0FDF4; color: var(--moss-dark); border: 1.5px solid rgba(46,204,113,.3); }
+.pincode-result.fail { background: #FFF0EE; color: var(--stamp-dark); border: 1.5px solid rgba(255,87,34,.3); }
+.delivery-areas-note { font-size: 12px; color: var(--ink-soft); margin-top: 6px; line-height: 1.6; }
+.delivery-areas-note strong { color: var(--moss-dark); }
+
+
+/* ---------- Size / Quantity Variant Pills ---------- */
+.variant-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.variant-pill {
+  padding: 7px 18px; border-radius: 50px; border: 2px solid var(--line);
+  background: var(--white); font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; transition: all .15s ease;
+  color: var(--ink-soft);
+}
+.variant-pill:hover { border-color: var(--moss); color: var(--moss-dark); }
+.variant-pill.active {
+  background: linear-gradient(135deg, var(--moss), var(--moss-dark));
+  border-color: transparent; color: var(--white);
+  box-shadow: 0 3px 10px rgba(46,204,113,0.35);
+}
+.variant-pill.out-of-stock { opacity: .45; cursor: not-allowed; text-decoration: line-through; }
+
+/* Admin size-variants panel */
+.variant-box {
+  background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 10px; position: relative;
+}
+.variant-box .remove-var {
+  position: absolute; top: 10px; right: 12px; background: none; border: none;
+  color: var(--stamp); font-size: 18px; cursor: pointer; line-height: 1;
+}
+
+/* ---------- WhatsApp share button ---------- */
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: var(--white); display: inline-flex; align-items: center; gap: 8px;
+  border: none; border-radius: 50px; font-weight: 800; font-size: 13.5px;
+  padding: 12px 22px; cursor: pointer; box-shadow: 0 4px 14px rgba(37,211,102,0.35);
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(37,211,102,0.45); }
+
+/* ---------- Mobile responsiveness ---------- */
+@media (max-width: 880px) {
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-nav { flex-direction: row; overflow-x: auto; }
+  .admin-nav button { white-space: nowrap; }
+}
+
+@media (max-width: 760px) {
+  #pdp-grid { grid-template-columns: 1fr !important; }
+  #acct-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 700px) {
+  .topbar { font-size: 11px; }
+  .header-inner { padding: 10px 12px; gap: 10px; }
+  .logo { font-size: 21px; }
+  .logo small { display: none; }
+  .search-bar { order: 3; flex-basis: 100%; max-width: 100%; min-width: 0; }
+  .header-actions { gap: 12px; font-size: 0; margin-left: auto; }
+  .header-actions a, .header-actions button { font-size: 12px; gap: 3px; }
+  .category-nav-inner { gap: 6px; }
+  .category-nav a { padding: 7px 14px; font-size: 12px; }
+  .hero-copy { padding: 40px 18px 32px; }
+  .hero-stat { padding-right: 18px; margin-right: 18px; }
+  .cat-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 10px; }
+  .cat-card { padding: 14px 6px; }
+  .cat-card .icon { font-size: 26px; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .section { padding: 28px 0; }
+  .section-head h2 { font-size: 20px; }
+  .modal-card { padding: 22px; }
+  .form-card { margin: 20px auto; padding: 24px; }
+}
+
+@media (max-width: 420px) {
+  .header-actions a span:not(.cart-badge), .header-actions button span { display: none; }
+}
+
+/* =========================================================
+   Mobile app-shell: fresh gradient header, category scroller,
+   bottom tab bar, floating cart.
+   ========================================================= */
+.m-header, .m-tabbar, .m-float-cart { display: none; }
+
+@media (max-width: 600px) {
+  .topbar, .header, .footer { display: none; }
+
+  .m-header {
+    display: block;
+    background: linear-gradient(135deg, #0A3D1F 0%, #1A6B38 100%);
+    color: var(--white); position: sticky; top: 0; z-index: 60;
+    padding: 14px 16px 12px;
+  }
+  .m-header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .m-promise { display: flex; flex-direction: column; }
+  .m-promise-label { font-size: 11px; opacity: .7; font-family: 'JetBrains Mono', monospace; letter-spacing: .04em; }
+  .m-promise-time { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 22px; color: var(--white); display: flex; align-items: center; gap: 8px; }
+  .m-pill {
+    font-size: 9.5px; font-weight: 700;
+    background: rgba(255,179,0,0.2); color: var(--gold);
+    padding: 3px 9px; border-radius: 50px; letter-spacing: .03em; border: 1px solid rgba(255,179,0,0.3);
+  }
+  .m-header-icons { display: flex; gap: 10px; align-items: center; }
+  .m-icon-btn {
+    width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex;
+    align-items: center; justify-content: center; font-size: 17px; position: relative; color: var(--white);
+  }
+  .m-icon-round { background: var(--gold); color: var(--ink); font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 15px; }
+  .m-locator {
+    font-size: 12.5px; margin-top: 12px; font-family: 'JetBrains Mono', monospace; opacity: .85;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .m-locator-tag { color: var(--gold); font-weight: 700; letter-spacing: .03em; margin-right: 4px; }
+  .m-search-bar {
+    display: flex; align-items: center; gap: 8px; background: var(--white); border-radius: 50px;
+    padding: 11px 16px; margin-top: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .m-search-icon { font-size: 15px; opacity: .55; }
+  .m-search-bar input { flex: 1; border: none; outline: none; font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--ink); background: transparent; }
+  .m-cat-row { display: flex; gap: 14px; overflow-x: auto; margin-top: 14px; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+  .m-cat-row::-webkit-scrollbar { display: none; }
+  .m-cat-item { display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; opacity: .75; transition: opacity .15s; }
+  .m-cat-item.active { opacity: 1; }
+  .m-cat-icon-wrap {
+    width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex;
+    align-items: center; justify-content: center; font-size: 20px; border: 2px solid transparent;
+    transition: all .2s;
+  }
+  .m-cat-item.active .m-cat-icon-wrap { border-color: var(--gold); background: rgba(255,179,0,0.2); }
+  .m-cat-item span:last-child { font-size: 10.5px; color: rgba(255,255,255,0.9); white-space: nowrap; font-weight: 600; }
+
+  .m-tabbar {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 70; background: var(--white);
+    border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -4px 20px rgba(26,46,29,0.10);
+  }
+  .m-tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px;
+    color: var(--ink-soft); font-size: 10.5px; font-weight: 700; transition: color .15s;
+  }
+  .m-tab-icon { font-size: 20px; }
+  .m-tab.active { color: var(--moss-dark); }
+
+  .m-float-cart {
+    display: flex; position: fixed; left: 16px; right: 16px; bottom: 72px; z-index: 65;
+    background: linear-gradient(135deg, var(--moss-dark), #1A8A50);
+    color: var(--white); border-radius: 18px; padding: 14px 18px;
+    align-items: center; gap: 12px; box-shadow: 0 8px 28px rgba(26,46,29,0.28);
+    animation: slide-in-up 0.3s ease-out;
+  }
+  .m-float-cart-thumb { font-size: 20px; }
+  .m-float-cart-text { flex: 1; font-size: 13px; font-weight: 600; }
+  .m-float-cart-text strong { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; margin-left: 5px; }
+  .m-float-cart-arrow { font-size: 22px; opacity: .8; }
+
+  /* Page content needs breathing room above the fixed tab bar */
+  #main-content { padding-bottom: 90px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+/* ---------------- Supabase setup ---------------- */
+// NOTE: The Supabase anon key is intentionally public — it is safe to expose in
+// client-side code when Supabase Row Level Security (RLS) policies are correctly
+// configured on all tables. Do NOT put the service_role key here.
+const SUPABASE_URL = 'https://qommbyttiqnyjxbeyjif.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvbW1ieXR0aXFueWp4YmV5amlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NzMzNDYsImV4cCI6MjA5ODE0OTM0Nn0.Ndh9LBa5oBUzTTDRxf-Ldkcb7J0a9L_m5Yfdm76mceM';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ---- Cloudinary (direct unsigned upload — see uploadFileToCloudinary below) ----
+   SECURITY: The upload preset must be "unsigned" and should be restricted in the
+   Cloudinary dashboard to allowed file types (image only) and a max file size.
+   Anyone who discovers these values can upload to this account — tighten the
+   preset's allowed origins/referrers in Cloudinary settings if this is production. */
+const CLOUDINARY_CLOUD_NAME = 'dtkmcauam';
+const CLOUDINARY_UPLOAD_PRESET = 'shivganga_unsigned';
+
+/* ---------------- App state ---------------- */
+let state = {
+  route: { name: 'home' },
+  user: null,
+  profile: null,
+  categories: [],
+  cartItems: [],   // [{id, quantity, product}]
+  toast: '',
+  guestCart: [],   // Fix #18: [{productId, quantity, product}] for logged-out users
+};
+
+/* Fix #18: Guest cart helpers using localStorage */
+const GUEST_CART_KEY = 'jjmart_guest_cart';
+function loadGuestCart() {
+  try {
+    const raw = localStorage.getItem(GUEST_CART_KEY);
+    state.guestCart = raw ? JSON.parse(raw) : [];
+  } catch { state.guestCart = []; }
+}
+function saveGuestCart() {
+  try { localStorage.setItem(GUEST_CART_KEY, JSON.stringify(state.guestCart)); } catch {}
+}
+async function mergeGuestCartOnLogin() {
+  if (!state.user || state.guestCart.length === 0) return;
+  for (const item of state.guestCart) {
+    const existing = state.cartItems.find(i => i.product.id === item.productId);
+    if (existing) {
+      const newQty = existing.quantity + item.quantity;
+      await sb.from('cart_items').update({ quantity: newQty }).eq('id', existing.id);
+    } else {
+      await sb.from('cart_items').insert({ user_id: state.user.id, product_id: item.productId, quantity: item.quantity });
+    }
+  }
+  state.guestCart = [];
+  saveGuestCart();
+  await loadCart();
+}
+
+function setState(patch) {
+  state = { ...state, ...patch };
+  render();
+}
+
+/* Fix #9: Debounce helper for live search */
+function debounce(fn, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+let _searchInFlight = false; // Fix #14: track in-flight search to prevent duplicates
+const debouncedLiveSearch = debounce(function (q) {
+  if (q && q.trim().length >= 2) go({ name: 'search', q: q.trim() });
+}, 350);
+
+function go(route, opts = {}) {
+  // Fix #17: save scroll position of current page before navigating away
+  const currentKey = JSON.stringify(state.route);
+  sessionStorage.setItem('scroll:' + currentKey, String(window.scrollY));
+
+  setState({ route });
+  window.scrollTo(0, 0);
+  if (opts.replace) {
+    history.replaceState({ route }, '', '#' + encodeURIComponent(JSON.stringify(route)));
+  } else {
+    history.pushState({ route }, '', '#' + encodeURIComponent(JSON.stringify(route)));
+  }
+}
+
+// Browser back/forward should move through app pages, not exit the site.
+window.addEventListener('popstate', (e) => {
+  const route = e.state?.route || { name: 'home' };
+  setState({ route });
+  // Fix #17: restore scroll position when navigating back/forward
+  const savedScroll = sessionStorage.getItem('scroll:' + JSON.stringify(route));
+  if (savedScroll) {
+    requestAnimationFrame(() => window.scrollTo(0, parseInt(savedScroll, 10)));
+  } else {
+    window.scrollTo(0, 0);
+  }
+});
+
+function showToast(msg) {
+  setState({ toast: msg });
+  setTimeout(() => setState({ toast: '' }), 2500);
+}
+
+/* ---------------- Data loaders ---------------- */
+async function loadCategories() {
+  const { data } = await sb.from('categories').select('*').order('sort_order');
+  setState({ categories: data || [] });
+}
+
+async function loadSettings() {
+  const { data } = await sb.from('site_settings').select('*');
+  const settings = {};
+  (data || []).forEach(row => { settings[row.key] = row.value; });
+  state.settings = settings;
+  applySettingsToPage();
+}
+
+function applySettingsToPage() {
+  const s = state.settings || {};
+  if (s.color_green) document.documentElement.style.setProperty('--moss', s.color_green);
+  if (s.color_orange) document.documentElement.style.setProperty('--stamp', s.color_orange);
+  if (s.color_cream) document.documentElement.style.setProperty('--paper', s.color_cream);
+  if (s.store_name) document.title = `${s.store_name} — ${s.tagline || 'Groceries, delivered'}`;
+}
+
+function getFreeDeliveryThreshold() {
+  return Number(state.settings?.free_delivery_threshold || 299);
+}
+function getDeliveryFee() {
+  return Number(state.settings?.delivery_fee || 25);
+}
+
+/* =========================================================
+   STORE HOURS: open 8:00 AM – 10:00 PM IST
+   ========================================================= */
+const STORE_OPEN_HOUR  = 8;   // 8:00 AM
+const STORE_CLOSE_HOUR = 22;  // 10:00 PM
+
+function getISTHour() {
+  // IST = UTC+5:30
+  const now = new Date();
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const istMs = utcMs + (5.5 * 3600000);
+  return new Date(istMs).getHours();
+}
+
+function isStoreOpen() {
+  const h = getISTHour();
+  return h >= STORE_OPEN_HOUR && h < STORE_CLOSE_HOUR;
+}
+
+function storeClosedMessage() {
+  const h = getISTHour();
+  if (h < STORE_OPEN_HOUR) return `We open at 8:00 AM IST. Come back soon! 🌅`;
+  return `We're closed for the night. Back at 8:00 AM tomorrow! 🌙`;
+}
+
+/* =========================================================
+   PINCODE RESTRICTION: Dwarka Mor + Uttam Nagar areas
+   =========================================================
+   Dwarka Mor    – 110059
+   Uttam Nagar   – 110059, 110056, 110078
+   ========================================================= */
+const ALLOWED_PINCODES = {
+  '110059': 'Dwarka Mor / Uttam Nagar',
+  '110056': 'Uttam Nagar',
+  '110078': 'Uttam Nagar (East)',
+};
+
+function isPincodeAllowed(pin) {
+  return Object.prototype.hasOwnProperty.call(ALLOWED_PINCODES, String(pin).trim());
+}
+
+function pincodeAreaName(pin) {
+  return ALLOWED_PINCODES[String(pin).trim()] || '';
+}
+
+window.checkPincode = function () {
+  const input = document.getElementById('pincode-checker-input');
+  const resultEl = document.getElementById('pincode-checker-result');
+  if (!input || !resultEl) return;
+  const pin = input.value.trim();
+  resultEl.style.display = 'inline-block';
+  if (!/^\d{6}$/.test(pin)) {
+    resultEl.className = 'pincode-result fail';
+    resultEl.textContent = '⚠️ Enter a valid 6-digit pincode';
+    return;
+  }
+  if (isPincodeAllowed(pin)) {
+    resultEl.className = 'pincode-result ok';
+    resultEl.textContent = `✅ Great! We deliver to ${pincodeAreaName(pin)} (${pin})!`;
+  } else {
+    resultEl.className = 'pincode-result fail';
+    resultEl.textContent = `❌ Sorry, we don't deliver to ${pin} yet. We serve Dwarka Mor & Uttam Nagar.`;
+  }
+};
+
+async function loadCart() {
+  if (!state.user) { setState({ cartItems: [] }); return; }
+  const { data } = await sb.from('cart_items').select('id, quantity, product:products(*)').eq('user_id', state.user.id).order('created_at');
+  setState({ cartItems: data || [] });
+}
+
+async function refreshSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  state.user = session?.user || null;
+  if (state.user) {
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', state.user.id).single();
+    state.profile = profile;
+  } else {
+    state.profile = null;
+  }
+  await loadCart();
+}
+
+/* ---------------- Cart actions (optimistic — UI updates instantly, DB syncs in background) ---------------- */
+async function addToCart(productId, qty = 1) {
+  // Block ordering outside store hours
+  if (!isStoreOpen()) {
+    showToast(`Store is closed. ${storeClosedMessage()}`);
+    return;
+  }
+  // Fix #18: guest cart — allow adding without login, merge on login
+  if (!state.user) {
+    const product = state._knownProducts?.[productId];
+    if (!product) return;
+    const existing = state.guestCart.find(i => i.productId === productId);
+    if (existing) {
+      existing.quantity += qty;
+    } else {
+      state.guestCart.push({ productId, quantity: qty, product });
+    }
+    saveGuestCart();
+    showToast('Added to cart — log in to checkout');
+    patchCartUI(productId);
+    return;
+  }
+
+  const existing = state.cartItems.find(i => i.product.id === productId);
+
+  if (existing) {
+    existing.quantity += qty;
+    patchCartUI(productId);
+    const { error } = await sb.from('cart_items').update({ quantity: existing.quantity }).eq('id', existing.id);
+    if (error) { existing.quantity -= qty; patchCartUI(productId); showToast('Could not update cart — please try again.'); }
+    return;
+  }
+
+  // New line: use the already-cached product so this is instant — no network round trip before the UI updates.
+  const product = state._knownProducts?.[productId];
+  if (!product) return;
+  const tempId = 'temp-' + productId;
+  // Fix #12: prevent duplicate temp entries if addToCart is called again while the insert is in-flight
+  if (state.cartItems.find(i => i.id === tempId)) return;
+  state.cartItems.push({ id: tempId, quantity: qty, product });
+  patchCartUI(productId);
+
+  const { data, error } = await sb.from('cart_items').insert({ user_id: state.user.id, product_id: productId, quantity: qty }).select('id').single();
+  if (error) {
+    state.cartItems = state.cartItems.filter(i => i.id !== tempId);
+    patchCartUI(productId);
+    showToast('Could not add to cart — please try again.');
+    return;
+  }
+  const line = state.cartItems.find(i => i.id === tempId);
+  if (line) line.id = data.id;
+}
+
+async function updateQty(cartItemId, qty) {
+  const line = state.cartItems.find(i => i.id === cartItemId);
+  if (!line) return;
+  const prevQty = line.quantity;
+  const productId = line.product.id;
+
+  if (qty <= 0) {
+    state.cartItems = state.cartItems.filter(i => i.id !== cartItemId);
+    patchCartUI(productId);
+    const { error } = await sb.from('cart_items').delete().eq('id', cartItemId);
+    if (error) { state.cartItems.push(line); patchCartUI(productId); showToast('Could not remove item — please try again.'); }
+    return;
+  }
+
+  line.quantity = qty;
+  patchCartUI(productId);
+  const { error } = await sb.from('cart_items').update({ quantity: qty }).eq('id', cartItemId);
+  if (error) { line.quantity = prevQty; patchCartUI(productId); showToast('Could not update quantity — please try again.'); }
+}
+
+async function removeItem(cartItemId) {
+  const idx = state.cartItems.findIndex(i => i.id === cartItemId);
+  if (idx === -1) return;
+  const [removed] = state.cartItems.splice(idx, 1);
+  patchCartUI(removed.product.id);
+  const { error } = await sb.from('cart_items').delete().eq('id', cartItemId);
+  if (error) { state.cartItems.splice(idx, 0, removed); patchCartUI(removed.product.id); showToast('Could not remove item — please try again.'); }
+}
+
+function cartCount() {
+  if (!state.user) return state.guestCart.reduce((s, i) => s + i.quantity, 0);
+  return state.cartItems.reduce((s, i) => s + i.quantity, 0);
+}
+
+function cartSubtotal() {
+  if (!state.user) return state.guestCart.reduce((s, i) => s + i.quantity * Number(i.product.price), 0);
+  return state.cartItems.reduce((s, i) => s + i.quantity * Number(i.product.price), 0);
+}
+
+/* Lightweight UI patch used by cart actions: updates the header cart badge
+   and any visible product card(s) for the affected product, without
+   re-fetching data or rebuilding the whole page. Falls back to a full
+   render() only on pages that don't use product cards (cart/checkout). */
+function patchCartUI(productId) {
+  const badge = document.querySelector('.header-actions .cart-badge');
+  const count = cartCount();
+  const cartLink = document.querySelector('.header-actions a[onclick*="cart"]');
+  if (cartLink) {
+    cartLink.innerHTML = `🛒 Cart ${count > 0 ? `<span class="cart-badge">${count}</span>` : ''}`;
+  }
+
+  if (state.route.name === 'cart' || state.route.name === 'checkout') {
+    // These pages render cart lines directly; just re-render the page (cheap, no network call).
+    render();
+    return;
+  }
+
+  if (productId) {
+    const product =
+      state.cartItems.find(i => i.product.id === productId)?.product ||
+      state._knownProducts?.[productId];
+    if (product) {
+      document.querySelectorAll(`[data-action-for="${productId}"]`).forEach(slot => {
+        slot.innerHTML = productActionHTML(product);
+      });
+      document.querySelectorAll(`.product-card[data-product-id="${productId}"] .stock-badge`).forEach(b => b.remove());
+    }
+  }
+}
+/* ---------------- Helpers ---------------- */
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// A clean inline placeholder (no network request, so it can never itself fail to load)
+// shown whenever a product's actual image URL is missing or fails to load for any reason.
+const NO_IMAGE_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+     <rect width="400" height="400" fill="#E8DFC9"/>
+     <text x="50%" y="46%" font-family="monospace" font-size="34" text-anchor="middle" fill="#4A4337">🛒</text>
+     <text x="50%" y="62%" font-family="monospace" font-size="13" text-anchor="middle" fill="#8A8276">no photo yet</text>
+   </svg>`
+);
+
+// Use as: <img src="${imgSrc(p.image_url)}" onerror="${imgOnError()}">
+function imgSrc(url) {
+  return url ? esc(url) : NO_IMAGE_PLACEHOLDER;
+}
+function imgOnError() {
+  // Swap to the placeholder and remove the handler so a second failure can't loop.
+  return `this.onerror=null;this.src='${NO_IMAGE_PLACEHOLDER}';`;
+}
+
+function productActionHTML(p) {
+  if (p.stock === 0) {
+    return `<button class="add-btn" disabled>Out of stock</button>`;
+  }
+  // Bug 8 fix: reflect both logged-in cart AND guest cart on product cards
+  const line = state.cartItems.find(i => i.product.id === p.id);
+  if (line) {
+    return `
+      <div class="qty-stepper">
+        <button onclick="updateQty('${line.id}', ${line.quantity - 1})">−</button>
+        <span>${line.quantity}</span>
+        <button onclick="updateQty('${line.id}', ${line.quantity + 1})">+</button>
+      </div>`;
+  }
+  const guestLine = state.guestCart.find(i => i.productId === p.id);
+  if (guestLine) {
+    return `
+      <div class="qty-stepper">
+        <button onclick="updateGuestQty('${p.id}', ${guestLine.quantity - 1})">−</button>
+        <span>${guestLine.quantity}</span>
+        <button onclick="updateGuestQty('${p.id}', ${guestLine.quantity + 1})">+</button>
+      </div>`;
+  }
+  return `<button class="add-btn" onclick="addToCart('${p.id}')">ADD</button>`;
+}
+
+function productCardHTML(p) {
+  state._knownProducts = state._knownProducts || {};
+  state._knownProducts[p.id] = p;
+  const off = p.mrp > p.price ? Math.round((p.mrp - p.price) / p.mrp * 100) : 0;
+  return `
+    <div class="product-card" data-product-id="${p.id}">
+      ${p.stock > 0 && p.stock <= 5 ? `<span class="stock-badge">Only ${p.stock} left</span>` : ''}
+      ${p.stock === 0 ? `<span class="stock-badge" style="background:#8A8276">Out of stock</span>` : ''}
+      <a onclick="go({name:'product', slug:'${p.slug}'})"><img src="${imgSrc(p.image_url)}" alt="${esc(p.name)}" loading="lazy" onerror="${imgOnError()}"></a>
+      <div class="product-body">
+        <span class="product-brand">${esc(p.brand || '')}</span>
+        <a onclick="go({name:'product', slug:'${p.slug}'})"><div class="product-name">${esc(p.name)}</div></a>
+        <span class="product-unit">${esc(p.unit)}</span>
+        ${p.rating > 0 ? `<span class="product-rating">★ ${p.rating} (${p.rating_count})</span>` : ''}
+        <div class="price-tag">
+          <span class="price-now">₹${p.price}</span>
+          ${off > 0 ? `<span class="price-mrp">₹${p.mrp}</span><span class="price-off">${off}% OFF</span>` : ''}
+        </div>
+        <span class="product-action-slot" data-action-for="${p.id}">${productActionHTML(p)}</span>
+      </div>
+    </div>`;
+}
+
+/* ---------------- Page renderers ---------------- */
+function renderCategoriesGrid(root) {
+  root.innerHTML = `
+    <div class="container">
+      <div class="page-head"><h1>All Aisles</h1></div>
+      <div class="cat-grid" style="padding-bottom:40px;">
+        ${state.categories.map(c => `
+          <a class="cat-card" onclick="go({name:'category', slug:'${c.slug}'})">
+            <span class="icon">${c.icon}</span><span class="name">${esc(c.name)}</span>
+          </a>`).join('')}
+      </div>
+    </div>`;
+}
+
+async function renderHome(root) {
+  const storeName = state.settings?.store_name || 'JJ Mart';
+  const catCount = state.categories.length;
+  const catCountLabel = String(catCount).padStart(2, '0');
+
+  // Fix #8: fetch live product count for the hero stat instead of hardcoding "35+"
+  const { count: productCount } = await sb.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true);
+  const displayProductCount = productCount != null ? `${productCount}+` : '—';
+
+  root.innerHTML = `
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <span class="eyebrow">Est. in your neighborhood — open daily</span>
+          <h1>The grocery list,<br>settled <em>before noon.</em></h1>
+          <p>${esc(storeName)} brings fresh vegetables, dairy, staples, and household items from local stores to your home — weighed fair, priced honest.</p>
+          <a class="btn btn-primary" onclick="go({name:'category', slug:'fruits-vegetables'})">Shop fresh produce →</a>
+          <div style="margin-top:20px;">
+            <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;">📍 CHECK DELIVERY TO YOUR AREA</div>
+            <div class="pincode-check-wrap">
+              <input id="pincode-checker-input" type="text" inputmode="numeric" maxlength="6" placeholder="Enter pincode…" style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);color:#fff;" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter'){checkPincode();event.preventDefault();}">
+              <button onclick="checkPincode()">Check</button>
+            </div>
+            <div id="pincode-checker-result" class="pincode-result" style="display:none;"></div>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><strong>${esc(displayProductCount)}</strong><span>ITEMS STOCKED</span></div>
+            <div class="hero-stat"><strong>${catCount}</strong><span>AISLES</span></div>
+            <div class="hero-stat"><strong>₹${getFreeDeliveryThreshold()}</strong><span>FREE DELIVERY ABOVE</span></div>
+          </div>
+        </div>
+        <div class="hero-panel">
+          <div class="orb1">🥦</div>
+          <div class="orb2">🍅</div>
+          <div class="orb3">🥛</div>
+          <div class="stamp-mark">
+            <strong>Fresh</strong>
+            <span>EVERY DAY</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section container">
+      <div class="section-head"><h2>Shop by aisle <span class="tag">${catCountLabel} SECTIONS</span></h2></div>
+      <div class="cat-grid">
+        ${state.categories.map(c => `
+          <a class="cat-card" onclick="go({name:'category', slug:'${c.slug}'})">
+            <span class="icon">${c.icon}</span><span class="name">${esc(c.name)}</span>
+          </a>`).join('')}
+      </div>
+    </section>
+    <div id="home-products"><div class="spinner-wrap">Loading products…</div></div>
+  `;
+
+  const container = document.getElementById('home-products');
+
+  // Fire all category product fetches in parallel instead of one-at-a-time —
+  // sequential awaits here were stacking up network latency 8x over.
+  const results = await Promise.all(
+    state.categories.map(cat =>
+      sb.from('products').select('*').eq('category_id', cat.id).eq('is_active', true)
+        .order('rating_count', { ascending: false }).limit(4)
+        .then(({ data }) => ({ cat, prods: data || [] }))
+    )
+  );
+
+  // Guard against the user navigating away while these requests were in flight.
+  if (state.route.name !== 'home') return;
+
+  let html = '';
+  for (const { cat, prods } of results) {
+    if (prods.length > 0) {
+      html += `
+        <section class="section container">
+          <div class="section-head">
+            <h2>${cat.icon} ${esc(cat.name)}</h2>
+            <a onclick="go({name:'category', slug:'${cat.slug}'})">View all →</a>
+          </div>
+          <div class="product-grid">${prods.map(productCardHTML).join('')}</div>
+        </section>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+const CAT_PAGE_SIZE = 24; // Fix #10: paginate category/search to avoid huge DOM
+
+async function renderCategory(root, slug) {
+  root.innerHTML = `<div class="container"><div class="spinner-wrap">Loading…</div></div>`;
+  const { data: cat } = await sb.from('categories').select('*').eq('slug', slug).single();
+  if (!cat) { root.innerHTML = `<div class="empty-state"><span class="emoji">🤔</span><h3>Category not found</h3></div>`; return; }
+  // Fix #10: fetch with a sensible limit; user can load more
+  const { data: prods } = await sb.from('products').select('*').eq('category_id', cat.id).eq('is_active', true).limit(CAT_PAGE_SIZE);
+  state._catProducts = prods || [];
+  state._catAllLoaded = (prods || []).length < CAT_PAGE_SIZE;
+  state._catSlug = slug;
+  state._catId = cat.id;
+  state._sort = state._sort || 'popular';
+  renderCategoryList(root, cat);
+}
+
+function sortProducts(list, sort) {
+  const arr = [...list];
+  if (sort === 'price_low') arr.sort((a, b) => a.price - b.price);
+  else if (sort === 'price_high') arr.sort((a, b) => b.price - a.price);
+  else if (sort === 'rating') arr.sort((a, b) => b.rating - a.rating);
+  else arr.sort((a, b) => b.rating_count - a.rating_count);
+  return arr;
+}
+
+function renderCategoryList(root, cat) {
+  const sorted = sortProducts(state._catProducts, state._sort);
+  const sorts = [['popular', 'Popularity'], ['price_low', 'Price: Low to High'], ['price_high', 'Price: High to Low'], ['rating', 'Rating']];
+  root.innerHTML = `
+    <div class="container">
+      <div class="page-head">
+        <div class="breadcrumb"><a onclick="go({name:'home'})">Home</a> / ${esc(cat.name)}</div>
+        <h1>${cat.icon} ${esc(cat.name)}</h1>
+      </div>
+      <div class="sort-row">
+        <span style="font-size:13px;color:var(--ink-soft);font-weight:600;align-self:center;">Sort by:</span>
+        ${sorts.map(([val, label]) => `<button class="sort-btn ${state._sort === val ? 'active' : ''}" onclick="setSort('${val}')">${label}</button>`).join('')}
+      </div>
+      ${sorted.length === 0
+        ? `<div class="empty-state"><span class="emoji">🛒</span><h3>No products here yet</h3></div>`
+        : `<div class="product-grid" style="padding-bottom:24px">${sorted.map(productCardHTML).join('')}</div>
+           ${!state._catAllLoaded ? `<div style="text-align:center;padding-bottom:40px;"><button class="btn btn-outline" id="load-more-btn" data-cat-name="${esc(cat.name)}" data-cat-icon="${esc(cat.icon)}" onclick="loadMoreCategoryProducts(this)">Load more products</button></div>` : ''}`}
+    </div>`;
+}
+
+window.loadMoreCategoryProducts = async function (btn) {
+  // Read cat name/icon from data attributes — avoids apostrophe-in-JS-string bugs
+  const catName = btn.dataset.catName || '';
+  const catIcon = btn.dataset.catIcon || '';
+  btn.disabled = true; btn.textContent = 'Loading…';
+  const offset = state._catProducts.length;
+  const { data: more } = await sb.from('products').select('*')
+    .eq('category_id', state._catId).eq('is_active', true)
+    .range(offset, offset + CAT_PAGE_SIZE - 1);
+  state._catProducts = [...state._catProducts, ...(more || [])];
+  state._catAllLoaded = (more || []).length < CAT_PAGE_SIZE;
+  renderCategoryList(document.getElementById('main-content'), { name: catName, icon: catIcon, slug: state._catSlug });
+};
+
+window.setSort = function (val) {
+  state._sort = val;
+  render();
+};
+
+async function renderProduct(root, slug) {
+  root.innerHTML = `<div class="container"><div class="spinner-wrap">Loading…</div></div>`;
+  const { data: p } = await sb.from('products').select('*').eq('slug', slug).single();
+  if (!p) { root.innerHTML = `<div class="empty-state"><span class="emoji">🔍</span><h3>Product not found</h3></div>`; return; }
+
+  const [{ data: cat }, { data: reviews }, { data: related }] = await Promise.all([
+    sb.from('categories').select('*').eq('id', p.category_id).single(),
+    sb.from('reviews').select('*, profile:profiles(full_name)').eq('product_id', p.id).order('created_at', { ascending: false }),
+    sb.from('products').select('*').eq('category_id', p.category_id).neq('id', p.id).eq('is_active', true).limit(4),
+  ]);
+
+  // Size variant support
+  const variants = Array.isArray(p.size_options) && p.size_options.length > 0 ? p.size_options : null;
+  // selectedVariant tracked in closure
+  let selIdx = -1; // -1 = default (no variant selected)
+
+  function activePrice() { return selIdx >= 0 ? variants[selIdx].price : p.price; }
+  function activeMrp()   { return selIdx >= 0 ? variants[selIdx].mrp   : p.mrp;   }
+  function activeStock()  { return selIdx >= 0 ? variants[selIdx].stock : p.stock;  }
+  function activeUnit()   { return selIdx >= 0 ? variants[selIdx].label : p.unit;   }
+
+  function offPct(mrp, price) { return mrp > price ? Math.round((mrp - price) / mrp * 100) : 0; }
+
+  function renderPriceBlock() {
+    const price = activePrice(), mrp = activeMrp(), off = offPct(mrp, price);
+    return `
+      <div style="display:flex;align-items:baseline;gap:12px;margin:18px 0;" id="pdp-price-block">
+        <span id="pdp-price-now" style="font-family:'Fraunces',serif;font-weight:700;font-size:30px;color:var(--stamp);transform:rotate(-1.5deg);display:inline-block;">₹${price}</span>
+        ${off > 0 ? `<span id="pdp-mrp" style="font-size:14px;color:var(--ink-soft);text-decoration:line-through;font-family:'JetBrains Mono',monospace;">₹${mrp}</span><span id="pdp-off" style="font-size:11px;color:var(--moss-dark);font-weight:700;font-family:'JetBrains Mono',monospace;border:1px dashed var(--moss);padding:2px 7px;border-radius:2px;">${off}% OFF</span>` : ''}
+      </div>`;
+  }
+
+  function renderVariantPills() {
+    if (!variants) return '';
+    return `
+      <div style="margin:4px 0 2px;">
+        <span style="font-size:12px;font-weight:700;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;letter-spacing:.03em;">SELECT SIZE</span>
+      </div>
+      <div class="variant-pills" id="pdp-variant-pills">
+        ${variants.map((v, i) => `
+          <button class="variant-pill${v.stock === 0 ? ' out-of-stock' : ''}" data-vi="${i}" onclick="selectVariant(${i})" title="${v.stock === 0 ? 'Out of stock' : ''}">
+            ${esc(v.label)}
+          </button>`).join('')}
+      </div>`;
+  }
+
+  function renderStockLine() {
+    const st = activeStock();
+    return `<p style="font-size:12px;color:var(--ink-soft);margin-top:16px;font-family:'JetBrains Mono',monospace;" id="pdp-stock-line">
+      ${st > 5 ? `✓ In stock (${st} available)` : st > 0 ? `⚠ Low stock — only ${st} left` : ''}
+    </p>`;
+  }
+
+  function renderActionHTML() {
+    const st = activeStock();
+    const line = state.cartItems.find(i => i.product.id === p.id);
+    if (st === 0) return `<p style="color:var(--stamp-dark);font-weight:700;margin-top:16px;" id="pdp-action">Out of stock</p>`;
+    return `<div style="display:flex;gap:14px;margin-top:24px;flex-wrap:wrap;align-items:center;" id="pdp-action">
+      ${line
+        ? `<div class="qty-stepper" style="width:140px"><button onclick="updateQty('${line.id}',${line.quantity - 1})">−</button><span>${line.quantity}</span><button onclick="updateQty('${line.id}',${line.quantity + 1})">+</button></div>`
+        : `<button class="btn btn-outline" onclick="addToCart('${p.id}')">Add to Cart</button>`}
+      <button class="btn btn-primary" onclick="buyNow('${p.id}')">Buy Now</button>
+    </div>`;
+  }
+
+  root.innerHTML = `
+    <div class="container">
+      <div class="breadcrumb" style="margin-top:20px">
+        <a onclick="go({name:'home'})">Home</a> / ${cat ? `<a onclick="go({name:'category',slug:'${cat.slug}'})">${esc(cat.name)}</a>` : ''} / ${esc(p.name)}
+      </div>
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:32px;padding:24px 0;" id="pdp-grid">
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:18px;">
+          <img src="${imgSrc(p.image_url)}" alt="${esc(p.name)}" style="width:100%;height:300px;object-fit:cover;border-radius:2px;" onerror="${imgOnError()}">
+        </div>
+        <div>
+          <span class="product-brand">${esc(p.brand || '')}</span>
+          <h1 style="font-size:24px;margin:4px 0;">${esc(p.name)}</h1>
+          <span class="product-unit" id="pdp-unit-label">${esc(p.unit)}</span>
+          ${p.rating > 0 ? `<div style="margin:8px 0;"><span class="product-rating">★ ${p.rating} (${p.rating_count} ratings)</span></div>` : ''}
+          ${renderVariantPills()}
+          ${renderPriceBlock()}
+          <p style="font-size:14px;line-height:1.6;max-width:460px;">${esc(p.description || '')}</p>
+          ${renderActionHTML()}
+          ${renderStockLine()}
+        </div>
+      </div>
+      <section style="padding:20px 0 40px;max-width:680px;">
+        <h2 style="font-size:17px;color:var(--ink);margin-bottom:12px;">Customer Reviews</h2>
+        ${(reviews || []).length === 0
+          ? `<p style="font-size:13.5px;color:var(--ink-soft);">No reviews yet. Be the first!</p>`
+          : reviews.map(r => `
+            <div style="border-bottom:1px solid var(--line);padding:10px 0;">
+              <div style="font-weight:700;font-size:13px;">★ ${r.rating} · ${esc(r.profile?.full_name || 'Anonymous')}</div>
+              ${r.comment ? `<p style="font-size:13px;margin-top:4px;">${esc(r.comment)}</p>` : ''}
+            </div>`).join('')}
+        ${state.user ? `
+        <div style="margin-top:18px;background:var(--paper);border:1.5px solid var(--line);border-radius:var(--radius);padding:16px;" id="review-form-wrap-${p.id}">
+          <h3 style="font-size:14px;font-weight:800;margin:0 0 12px;">Write a Review</h3>
+          <div style="display:flex;gap:6px;margin-bottom:10px;" id="star-row-${p.id}">
+            ${[1,2,3,4,5].map(n => `<button onclick="setReviewStar('${p.id}',${n})" data-star="${n}" style="font-size:22px;background:none;border:none;cursor:pointer;opacity:.35;transition:opacity .15s;">★</button>`).join('')}
+          </div>
+          <input type="hidden" id="review-star-${p.id}" value="0">
+          <textarea id="review-comment-${p.id}" rows="3" placeholder="Share your experience with this product…" style="width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px;resize:vertical;"></textarea>
+          <div id="review-err-${p.id}" style="font-size:12.5px;color:var(--stamp-dark);margin-top:6px;"></div>
+          <button class="btn btn-secondary" style="margin-top:10px;font-size:13px;padding:9px 20px;" onclick="submitReview('${p.id}')">Submit Review</button>
+        </div>` : `<p style="font-size:13px;color:var(--ink-soft);margin-top:14px;"><a onclick="go({name:'login'})" style="color:var(--moss-dark);font-weight:700;cursor:pointer;">Log in</a> to write a review.</p>`}
+      </section>
+      ${(related || []).length > 0 ? `
+        <section class="section" style="padding-top:0;">
+          <div class="section-head"><h2>You may also like</h2></div>
+          <div class="product-grid">${related.map(productCardHTML).join('')}</div>
+        </section>` : ''}
+    </div>
+  `;
+
+  // Variant selection handler — updates price/stock/action in-place
+  window.selectVariant = function (i) {
+    if (!variants) return;
+    // Toggle off if same pill clicked
+    if (selIdx === i) { selIdx = -1; } else { selIdx = i; }
+
+    // Update pill styles
+    document.querySelectorAll('#pdp-variant-pills .variant-pill').forEach(btn => {
+      const vi = Number(btn.dataset.vi);
+      btn.classList.toggle('active', vi === selIdx);
+    });
+
+    // Update unit label
+    const unitEl = document.getElementById('pdp-unit-label');
+    if (unitEl) unitEl.textContent = activeUnit();
+
+    // Update price block
+    const priceBlock = document.getElementById('pdp-price-block');
+    if (priceBlock) priceBlock.outerHTML = renderPriceBlock();
+
+    // Update action buttons
+    const actionEl = document.getElementById('pdp-action');
+    if (actionEl) actionEl.outerHTML = renderActionHTML();
+
+    // Update stock line
+    const stockEl = document.getElementById('pdp-stock-line');
+    if (stockEl) stockEl.outerHTML = renderStockLine();
+  };
+
+  // Note: #pdp-grid responsive styles are in the main <style> block (Fix #7)
+}
+
+// Bug 6: review star selector
+window.setReviewStar = function (productId, n) {
+  document.getElementById('review-star-' + productId).value = n;
+  document.querySelectorAll('#star-row-' + productId + ' button').forEach(btn => {
+    btn.style.opacity = Number(btn.dataset.star) <= n ? '1' : '.35';
+    btn.style.color = Number(btn.dataset.star) <= n ? 'var(--gold)' : '';
+  });
+};
+
+// Bug 6: review submit handler
+window.submitReview = async function (productId) {
+  const rating = Number(document.getElementById('review-star-' + productId).value);
+  const comment = (document.getElementById('review-comment-' + productId).value || '').trim();
+  const errEl = document.getElementById('review-err-' + productId);
+  if (rating === 0) { errEl.textContent = 'Please select a star rating.'; return; }
+  errEl.textContent = '';
+  const { error } = await sb.from('reviews').upsert({ product_id: productId, user_id: state.user.id, rating, comment }, { onConflict: 'product_id,user_id' });
+  if (error) { errEl.textContent = 'Could not submit review: ' + error.message; return; }
+  showToast('Review submitted! Thank you.');
+  document.getElementById('review-form-wrap-' + productId).innerHTML = '<p style="font-size:13.5px;color:var(--moss-dark);font-weight:700;">✅ Your review was submitted!</p>';
+};
+
+window.buyNow = async function (productId) {
+  if (!state.user) { showLoginPrompt(); return; }
+  const line = state.cartItems.find(i => i.product.id === productId);
+  if (!line) await addToCart(productId, 1);
+  // Bug 2 fix: go directly to checkout, not cart
+  go({ name: 'checkout' });
+};
+
+function renderCart(root) {
+  // Fix #18: guest users see their local cart with a login prompt to checkout
+  if (!state.user) {
+    if (state.guestCart.length === 0) {
+      root.innerHTML = `<div class="empty-state"><span class="emoji">🛒</span><h3>Your cart is empty</h3><p>Add some groceries to get started.</p><a class="btn btn-secondary" onclick="go({name:'home'})">Start Shopping</a></div>`;
+      return;
+    }
+    const subtotal = cartSubtotal();
+    const freeThreshold = getFreeDeliveryThreshold();
+    const deliveryFee = subtotal >= freeThreshold ? 0 : getDeliveryFee();
+    const total = subtotal + deliveryFee;
+    root.innerHTML = `
+      <div class="container">
+        <div class="page-head"><h1>Your Cart <span style="font-size:14px;color:var(--ink-soft);font-weight:600;">(${state.guestCart.length} items)</span></h1></div>
+        <div class="form-success" style="max-width:600px;margin-bottom:16px;">Log in to place your order — your cart will be saved!</div>
+        <div class="cart-layout" style="padding-bottom:40px;">
+          <div>
+            ${state.guestCart.map(item => `
+              <div class="cart-line">
+                <img src="${imgSrc(item.product.image_url)}" alt="${esc(item.product.name)}" onerror="${imgOnError()}">
+                <div class="cart-line-info">
+                  <div class="name">${esc(item.product.name)}</div>
+                  <div class="unit">${esc(item.product.unit)}</div>
+                  <button class="remove-link" onclick="removeGuestItem('${item.productId}')">Remove</button>
+                </div>
+                <div class="qty-stepper" style="width:100px;margin-top:0;">
+                  <button onclick="updateGuestQty('${item.productId}',${item.quantity - 1})">−</button>
+                  <span>${item.quantity}</span>
+                  <button onclick="updateGuestQty('${item.productId}',${item.quantity + 1})">+</button>
+                </div>
+                <div class="cart-line-price">₹${(item.quantity * item.product.price).toFixed(0)}</div>
+              </div>`).join('')}
+          </div>
+          <div class="summary-card">
+            <h3>Order Summary</h3>
+            <div class="summary-row"><span>Subtotal</span><span>₹${subtotal.toFixed(0)}</span></div>
+            <div class="summary-row"><span>Delivery Fee</span><span class="${deliveryFee === 0 ? 'free' : ''}">${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}</span></div>
+            <div class="summary-row total"><span>Total</span><span>₹${total.toFixed(0)}</span></div>
+            <button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="go({name:'login'})">Log in to Checkout →</button>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+  if (state.cartItems.length === 0) {
+    root.innerHTML = `<div class="empty-state"><span class="emoji">🛒</span><h3>Your cart is empty</h3><p>Add some groceries to get started.</p><a class="btn btn-secondary" onclick="go({name:'home'})">Start Shopping</a></div>`;
+    return;
+  }
+  const subtotal = cartSubtotal();
+  const freeThreshold = getFreeDeliveryThreshold();
+  const deliveryFee = subtotal >= freeThreshold ? 0 : getDeliveryFee();
+  const total = subtotal + deliveryFee;
+
+  root.innerHTML = `
+    <div class="container">
+      <div class="page-head"><h1>Your Cart <span style="font-size:14px;color:var(--ink-soft);font-weight:600;">(${state.cartItems.length} items)</span></h1></div>
+      <div class="cart-layout" style="padding-bottom:40px;">
+        <div>
+          ${state.cartItems.map(line => `
+            <div class="cart-line">
+              <img src="${imgSrc(line.product.image_url)}" alt="${esc(line.product.name)}" onerror="${imgOnError()}">
+              <div class="cart-line-info">
+                <div class="name">${esc(line.product.name)}</div>
+                <div class="unit">${esc(line.product.unit)}</div>
+                <button class="remove-link" onclick="removeItem('${line.id}')">Remove</button>
+              </div>
+              <div class="qty-stepper" style="width:100px;margin-top:0;">
+                <button onclick="updateQty('${line.id}',${line.quantity - 1})">−</button>
+                <span>${line.quantity}</span>
+                <button onclick="updateQty('${line.id}',${line.quantity + 1})" ${line.quantity >= line.product.stock ? 'disabled' : ''}>+</button>
+              </div>
+              <div class="cart-line-price">₹${(line.quantity * line.product.price).toFixed(0)}</div>
+            </div>`).join('')}
+        </div>
+        <div class="summary-card">
+          <h3>Order Summary</h3>
+          <div class="summary-row"><span>Subtotal</span><span>₹${subtotal.toFixed(0)}</span></div>
+          <div class="summary-row"><span>Delivery Fee</span><span class="${deliveryFee === 0 ? 'free' : ''}">${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}</span></div>
+          ${deliveryFee > 0 ? `<p style="font-size:11.5px;color:var(--ink-soft);margin-top:-4px;margin-bottom:10px;">Add ₹${(freeThreshold - subtotal).toFixed(0)} more for free delivery</p>` : ''}
+          <div class="summary-row total"><span>Total</span><span>₹${total.toFixed(0)}</span></div>
+          <button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="go({name:'checkout'})">Proceed to Checkout →</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function renderCheckout(root) {
+  if (!state.user) {
+    root.innerHTML = `<div class="empty-state"><span class="emoji">🔒</span><h3>Please log in to checkout</h3><a class="btn btn-secondary" onclick="go({name:'login'})">Login</a></div>`;
+    return;
+  }
+  if (state.cartItems.length === 0) {
+    root.innerHTML = `<div class="empty-state"><span class="emoji">🛒</span><h3>Your cart is empty</h3><a class="btn btn-secondary" onclick="go({name:'home'})">Start Shopping</a></div>`;
+    return;
+  }
+  root.innerHTML = `<div class="container"><div class="spinner-wrap">Loading checkout…</div></div>`;
+  const { data: addresses } = await sb.from('addresses').select('*').eq('user_id', state.user.id).order('is_default', { ascending: false });
+  state._addresses = addresses || [];
+  state._selectedAddr = state._addresses[0]?.id || null;
+  state._showAddrForm = state._addresses.length === 0;
+  state._checkoutError = '';
+  state._paymentMethod = state._paymentMethod || 'cod';
+  // Feature 3: reset coupon state each time checkout opens
+  state._couponCode = '';
+  state._couponDiscount = 0;
+  state._couponMsg = '';
+  renderCheckoutView(root);
+}
+
+function renderCheckoutView(root) {
+  const subtotal = cartSubtotal();
+  const freeThreshold = getFreeDeliveryThreshold();
+  const deliveryFee = subtotal >= freeThreshold ? 0 : getDeliveryFee();
+  const total = subtotal + deliveryFee;
+
+  root.innerHTML = `
+    <div class="container">
+      <div class="page-head"><h1>Checkout</h1></div>
+      ${!isStoreOpen() ? `<div class="store-closed-banner" style="border-radius:16px;margin-bottom:16px;"><span class="closed-icon">🔒</span><span>Store is <strong>CLOSED</strong> right now. ${storeClosedMessage()}<br><span class="closed-time">We're open 8:00 AM – 10:00 PM IST daily.</span></span></div>` : ''}
+      ${state._checkoutError ? `<div class="form-error" style="max-width:600px;">${esc(state._checkoutError)}</div>` : ''}
+      <div class="cart-layout" style="padding-bottom:40px;">
+        <div>
+          <div class="summary-card" style="margin-bottom:18px;">
+            <h3>Delivery Address</h3>
+            <div class="delivery-areas-note" style="margin-bottom:14px;">📍 We deliver to <strong>Dwarka Mor &amp; Uttam Nagar</strong> only.<br>Accepted pincodes: <strong>110059</strong>, <strong>110056</strong>, <strong>110078</strong>.</div>
+            ${state._addresses.map(addr => `
+              <label style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start;">
+                <input type="radio" name="addr" ${state._selectedAddr === addr.id ? 'checked' : ''} onchange="selectAddr('${addr.id}')" style="margin-top:4px;">
+                <div style="font-size:13px;">
+                  <strong>${esc(addr.full_name)}</strong> · ${esc(addr.phone)}<br>
+                  <span style="color:var(--ink-soft);">${esc(addr.line1)}${addr.line2 ? ', ' + esc(addr.line2) : ''}, ${esc(addr.city)}, ${esc(addr.state)} - ${esc(addr.pincode)}</span>
+                </div>
+              </label>`).join('')}
+            ${!state._showAddrForm ? `<button class="btn btn-outline" style="margin-top:14px;" onclick="toggleAddrForm(true)">+ Add new address</button>` : `
+              <form onsubmit="saveAddress(event)" style="margin-top:14px;">
+                <div class="field"><label>Full name *</label><input id="af_name" required></div>
+                <div class="field"><label>Phone *</label><input id="af_phone" required></div>
+                <div class="field"><label>Address line 1 *</label><input id="af_line1" required></div>
+                <div class="field"><label>Address line 2</label><input id="af_line2"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div class="field"><label>City *</label><input id="af_city" required></div>
+                  <div class="field"><label>State *</label><input id="af_state" required></div>
+                </div>
+                <div class="field"><label>Pincode *</label><input id="af_pincode" required></div>
+                <div style="display:flex;gap:10px;">
+                  <button type="submit" class="btn btn-secondary">Save Address</button>
+                  ${state._addresses.length > 0 ? `<button type="button" class="btn btn-outline" onclick="toggleAddrForm(false)">Cancel</button>` : ''}
+                </div>
+              </form>`}
+          </div>
+          <div class="summary-card">
+            <h3>Payment Method</h3>
+            <label style="display:flex;gap:10px;padding:7px 0;cursor:pointer;">
+              <input type="radio" ${state._paymentMethod === 'cod' ? 'checked' : ''} onchange="setPayment('cod')"><span style="font-size:13.5px;">Cash on Delivery</span>
+            </label>
+            <label style="display:flex;gap:10px;padding:7px 0;cursor:pointer;opacity:.5;">
+              <input type="radio" disabled><span style="font-size:13.5px;">Online Payment (UPI/Card) — coming soon</span>
+            </label>
+          </div>
+        </div>
+        <div class="summary-card">
+          <h3>Order Summary</h3>
+          ${state.cartItems.map(line => `<div class="order-item-row"><span>${esc(line.product.name)} × ${line.quantity}</span><span>₹${(line.product.price * line.quantity).toFixed(0)}</span></div>`).join('')}
+          <div class="summary-row" style="margin-top:10px;"><span>Subtotal</span><span>₹${subtotal.toFixed(0)}</span></div>
+          <div class="summary-row"><span>Delivery</span><span class="${deliveryFee === 0 ? 'free' : ''}">${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}</span></div>
+          ${state._couponDiscount > 0 ? `<div class="summary-row" style="color:var(--moss-dark);font-weight:700;"><span>🎟 Coupon (${esc(state._couponCode)})</span><span>−₹${state._couponDiscount.toFixed(0)}</span></div>` : ''}
+          <div class="summary-row total"><span>Total</span><span>₹${(total - (state._couponDiscount||0)).toFixed(0)}</span></div>
+          <div style="margin:14px 0 4px;">
+            <div style="display:flex;gap:8px;">
+              <input id="coupon-input" type="text" placeholder="Promo code…" value="${esc(state._couponCode)}" style="flex:1;padding:10px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;text-transform:uppercase;">
+              <button onclick="applyCoupon()" style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--moss),var(--moss-dark));color:#fff;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;">Apply</button>
+            </div>
+            ${state._couponMsg ? `<div style="font-size:12px;margin-top:6px;font-weight:700;color:${state._couponDiscount>0?'var(--moss-dark)':'var(--stamp-dark)'};">${esc(state._couponMsg)}</div>` : ''}
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:10px;" id="place-order-btn" onclick="placeOrder()">Place Order — ₹${(total - (state._couponDiscount||0)).toFixed(0)}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+
+/* ── Feature 3: Coupon / promo code ── */
+window.applyCoupon = async function () {
+  const code = (document.getElementById('coupon-input')?.value || '').trim().toUpperCase();
+  const root = document.getElementById('main-content');
+  if (!code) { state._couponMsg = 'Please enter a promo code.'; state._couponCode = ''; state._couponDiscount = 0; if(root) renderCheckoutView(root); return; }
+
+  const { data: coupon, error } = await sb.from('coupons')
+    .select('*').eq('code', code).eq('is_active', true).single();
+
+  if (error || !coupon) {
+    state._couponCode = code; state._couponDiscount = 0;
+    state._couponMsg = '❌ Invalid or expired promo code.';
+    if(root) renderCheckoutView(root); return;
+  }
+
+  // Minimum order check
+  const subtotal = cartSubtotal();
+  if (coupon.min_order_value && subtotal < coupon.min_order_value) {
+    state._couponCode = code; state._couponDiscount = 0;
+    state._couponMsg = `⚠ Minimum order ₹${coupon.min_order_value} required for this code.`;
+    if(root) renderCheckoutView(root); return;
+  }
+
+  // Compute discount
+  let discount = 0;
+  if (coupon.discount_type === 'percent') {
+    discount = subtotal * coupon.discount_value / 100;
+    if (coupon.max_discount) discount = Math.min(discount, coupon.max_discount);
+  } else {
+    discount = coupon.discount_value;
+  }
+  discount = Math.min(discount, subtotal); // never exceed subtotal
+
+  state._couponCode = code;
+  state._couponDiscount = discount;
+  state._couponMsg = `✅ "${code}" applied — you save ₹${discount.toFixed(0)}!`;
+  if(root) renderCheckoutView(root);
+};
+
+window.selectAddr = function (id) { state._selectedAddr = id; };
+window.toggleAddrForm = function (show) {
+  state._showAddrForm = show;
+  // Fix #3: Use the dedicated main-content element instead of fragile DOM traversal
+  const root = document.getElementById('main-content');
+  if (root) renderCheckoutView(root);
+};
+window.setPayment = function (val) { state._paymentMethod = val; };
+
+window.saveAddress = async function (e) {
+  e.preventDefault();
+  const form = {
+    full_name: document.getElementById('af_name').value,
+    phone: document.getElementById('af_phone').value,
+    line1: document.getElementById('af_line1').value,
+    line2: document.getElementById('af_line2').value,
+    city: document.getElementById('af_city').value,
+    state: document.getElementById('af_state').value,
+    pincode: document.getElementById('af_pincode').value,
+  };
+  if (!form.full_name || !form.phone || !form.line1 || !form.city || !form.state || !form.pincode) {
+    state._checkoutError = 'Please fill in all required fields.';
+    render();
+    return;
+  }
+  // Fix #11: validate phone (10 digits) and pincode (6 digits)
+  if (!/^\d{10}$/.test(form.phone.replace(/\s+/g, ''))) {
+    state._checkoutError = 'Please enter a valid 10-digit phone number.';
+    render();
+    return;
+  }
+  if (!/^\d{6}$/.test(form.pincode.trim())) {
+    state._checkoutError = 'Please enter a valid 6-digit pincode.';
+    render();
+    return;
+  }
+  // Delivery area restriction
+  if (!isPincodeAllowed(form.pincode)) {
+    state._checkoutError = `🚫 We only deliver to Dwarka Mor & Uttam Nagar. Allowed pincodes: 110059, 110056, 110078. Please use a different address.`;
+    const root = document.getElementById('main-content');
+    if (root) renderCheckoutView(root); else render();
+    return;
+  }
+  const { data, error } = await sb.from('addresses').insert({ ...form, user_id: state.user.id, is_default: state._addresses.length === 0 }).select().single();
+  if (error) { state._checkoutError = error.message; render(); return; }
+  state._addresses.push(data);
+  state._selectedAddr = data.id;
+  state._showAddrForm = false;
+  state._checkoutError = '';
+  render();
+};
+
+window.placeOrder = async function () {
+  state._checkoutError = '';
+
+  // Store hours check
+  if (!isStoreOpen()) {
+    state._checkoutError = `🕙 Store is currently closed. ${storeClosedMessage()} (Open 8 AM – 10 PM IST)`;
+    render();
+    return;
+  }
+
+  if (!state._selectedAddr) { state._checkoutError = 'Please select or add a delivery address.'; render(); return; }
+
+  // Pincode restriction check
+  const addr = state._addresses.find(a => a.id === state._selectedAddr);
+  if (!isPincodeAllowed(addr.pincode)) {
+    state._checkoutError = `🚫 Sorry! We currently deliver only to Dwarka Mor & Uttam Nagar (pincodes: 110059, 110056, 110078). Your address pincode (${addr.pincode}) is outside our delivery area.`;
+    render();
+    return;
+  }
+
+  const btn = document.getElementById('place-order-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Placing order…'; }
+
+  const addressText = `${addr.line1}${addr.line2 ? ', ' + addr.line2 : ''}, ${addr.city}, ${addr.state} - ${addr.pincode}`;
+
+  // Fix #2: Check stock for each item sequentially so we get a deterministic
+  // first-failure message. Still not a DB-level transaction — for true atomicity
+  // this should call a Postgres RPC with FOR UPDATE row locks. This client-side
+  // check is a best-effort guard against obvious oversells.
+  for (const line of state.cartItems) {
+    const { data: fresh } = await sb.from('products').select('stock').eq('id', line.product.id).single();
+    if (!fresh || fresh.stock < line.quantity) {
+      state._checkoutError = `Sorry, "${line.product.name}" doesn't have enough stock. Please update your cart.`;
+      // Fix #6: re-enable the button on stock-check failure so user can retry
+      if (btn) { btn.disabled = false; btn.textContent = `Place Order — ₹${(cartSubtotal() + (cartSubtotal() >= getFreeDeliveryThreshold() ? 0 : getDeliveryFee())).toFixed(0)}`; }
+      render();
+      return;
+    }
+  }
+
+  const subtotal = cartSubtotal();
+  const freeThreshold = getFreeDeliveryThreshold();
+  const deliveryFee = subtotal >= freeThreshold ? 0 : getDeliveryFee();
+  // Feature 3: apply coupon discount to final total
+  const couponDiscount = state._couponDiscount || 0;
+  const total = Math.max(0, subtotal + deliveryFee - couponDiscount);
+
+  const { data: order, error: orderErr } = await sb.from('orders').insert({
+    user_id: state.user.id, address_id: state._selectedAddr, status: 'placed',
+    payment_method: state._paymentMethod, payment_status: state._paymentMethod === 'cod' ? 'pending' : 'paid',
+    subtotal, delivery_fee: deliveryFee, total,
+    delivery_name: addr.full_name, delivery_phone: addr.phone, delivery_address: addressText
+  }).select().single();
+
+  if (orderErr) { state._checkoutError = orderErr.message; render(); return; }
+
+  const orderItems = state.cartItems.map(line => ({
+    order_id: order.id, product_id: line.product.id, product_name: line.product.name,
+    unit: line.product.unit, price: line.product.price, quantity: line.quantity
+  }));
+  await sb.from('order_items').insert(orderItems);
+
+  for (const line of state.cartItems) {
+    await sb.from('products').update({ stock: line.product.stock - line.quantity }).eq('id', line.product.id);
+  }
+
+  await sb.from('cart_items').delete().eq('user_id', state.user.id);
+  await loadCart();
+  go({ name: 'orders', placed: order.id }, { replace: true });
+};
+
+
+/* ── Feature 2: Order tracking timeline ── */
+function orderTimelineHTML(status) {
+  if (status === 'cancelled') {
+    return `<div class="order-timeline">
+      <div class="ot-step cancelled"><div class="ot-dot">✕</div><div class="ot-label">Cancelled</div></div>
+    </div>`;
+  }
+  const steps = [
+    { key: 'placed',    icon: '📋', label: 'Order<br>Placed' },
+    { key: 'packed',    icon: '📦', label: 'Packed' },
+    { key: 'shipped',   icon: '🚚', label: 'Out for<br>Delivery' },
+    { key: 'delivered', icon: '✅', label: 'Delivered' },
+  ];
+  const order = ['placed', 'packed', 'shipped', 'delivered'];
+  const currentIdx = order.indexOf(status);
+  return '<div class="order-timeline">' +
+    steps.map((s, i) => {
+      const cls = i < currentIdx ? 'done' : i === currentIdx ? 'active' : '';
+      return `<div class="ot-step ${cls}"><div class="ot-dot">${s.icon}</div><div class="ot-label">${s.label}</div></div>`;
+    }).join('') +
+  '</div>';
+}
+
+
+/* ── Feature 4: WhatsApp order confirmation ── */
+function whatsappOrderText(order) {
+  const storeName = (state.settings && state.settings.store_name) || 'JJ Mart';
+  const items = (order.items || []).map(i => `• ${i.product_name} × ${i.quantity} — ₹${(i.price * i.quantity).toFixed(0)}`).join('\n');
+  const msg =
+    `🛒 *${storeName} — Order Confirmed!*\n` +
+    `Order ID: #${order.id.slice(0,8).toUpperCase()}\n\n` +
+    `*Items:*\n${items}\n\n` +
+    `*Total: ₹${Number(order.total).toFixed(0)}*\n` +
+    `Payment: ${order.payment_method === 'cod' ? 'Cash on Delivery' : 'Online'}\n\n` +
+    `Delivering to: ${order.delivery_address}\n\n` +
+    `Thank you for shopping with ${storeName}! 🙏`;
+  return encodeURIComponent(msg);
+}
+
+window.shareOrderOnWhatsApp = function (orderId) {
+  const order = (state._lastOrders || []).find(o => o.id === orderId);
+  if (!order) { showToast('Order details not available.'); return; }
+  window.open('https://wa.me/?text=' + whatsappOrderText(order), '_blank');
+};
+
+async function renderOrders(root, placedId) {
+  if (!state.user) {
+    root.innerHTML = `<div class="empty-state"><span class="emoji">🔒</span><h3>Please log in to view your orders</h3><a class="btn btn-secondary" onclick="go({name:'login'})">Login</a></div>`;
+    return;
+  }
+  root.innerHTML = `<div class="container"><div class="spinner-wrap">Loading your orders…</div></div>`;
+  const { data: orders } = await sb.from('orders').select('*, items:order_items(*)').eq('user_id', state.user.id).order('created_at', { ascending: false });
+  state._lastOrders = orders || []; // Feature 4: cache so shareOrderOnWhatsApp can read order details
+
+  root.innerHTML = `
+    <div class="container">
+      <div class="page-head"><h1>My Orders</h1></div>
+      ${placedId ? `<div class="form-success" style="max-width:600px;">
+        🎉 Order placed successfully! Track its status below.
+        <div style="margin-top:10px;">
+          <button class="btn-whatsapp" onclick="shareOrderOnWhatsApp('${placedId}')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Share on WhatsApp
+          </button>
+        </div>
+      </div>` : ''}
+      ${(!orders || orders.length === 0) ? `
+        <div class="empty-state"><span class="emoji">📦</span><h3>No orders yet</h3><p>Your order history will show up here.</p><a class="btn btn-secondary" onclick="go({name:'home'})">Start Shopping</a></div>` : `
+        <div style="padding-bottom:40px;max-width:680px;">
+          ${orders.map(order => `
+            <div class="order-card">
+              <div class="order-card-head">
+                <div><strong>Order #${order.id.slice(0, 8).toUpperCase()}</strong>
+                  <div style="font-size:11.5px;color:var(--ink-soft);">${new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                </div>
+                <span class="order-status status-${order.status}">${order.status}</span>
+              </div>
+              ${orderTimelineHTML(order.status)}
+              ${order.items.map(item => `
+                <div class="order-item-row"><span>${esc(item.product_name)} <span class="muted">× ${item.quantity} (${esc(item.unit)})</span></span><span>₹${(item.price * item.quantity).toFixed(0)}</span></div>`).join('')}
+              <div class="order-item-row" style="border-top:1px dashed var(--line);margin-top:6px;padding-top:8px;font-weight:700;">
+                <span>Total (${order.payment_method === 'cod' ? 'Cash on Delivery' : 'Paid Online'})</span><span>₹${Number(order.total).toFixed(2)}</span>
+              </div>
+              <p style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;">Delivering to: ${esc(order.delivery_address)}</p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+                ${order.status === 'placed' ? `<button class="btn btn-outline" style="font-size:12px;padding:7px 16px;border-radius:50px;color:var(--stamp-dark);border-color:var(--stamp-dark);" onclick="cancelOrder('${order.id}')">Cancel Order</button>` : ''}
+                <button class="btn-whatsapp" style="font-size:12px;padding:7px 16px;" onclick="shareOrderOnWhatsApp('${order.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Share on WhatsApp
+                </button>
+              </div>
+            </div>`).join('')}
+        </div>`}
+    </div>`;
+}
+
+// Bug 5: cancel order handler
+window.cancelOrder = async function (orderId) {
+  if (!confirm('Are you sure you want to cancel this order?')) return;
+  const { error } = await sb.from('orders').update({ status: 'cancelled' }).eq('id', orderId).eq('user_id', state.user.id);
+  if (error) { showToast('Could not cancel order. Please try again.'); return; }
+  showToast('Order cancelled.');
+  await renderOrders(document.getElementById('main-content'), null);
+};
+
+async function renderAccount(root) {
+  if (!state.user) {
+    root.innerHTML = `<div class="empty-state"><span class="emoji">🔒</span><h3>Please log in to view your account</h3><a class="btn btn-secondary" onclick="go({name:'login'})">Login</a></div>`;
+    return;
+  }
+  root.innerHTML = `<div class="container"><div class="spinner-wrap">Loading…</div></div>`;
+  const { data: addresses } = await sb.from('addresses').select('*').eq('user_id', state.user.id);
+
+  root.innerHTML = `
+    <div class="container" style="padding-bottom:40px;">
+      <div class="page-head"><h1>My Account</h1></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:760px;" id="acct-grid">
+        <div class="summary-card">
+          <h3>Profile Details</h3>
+          <div id="acct-msg"></div>
+          <form onsubmit="saveProfile(event)">
+            <div class="field"><label>Full Name</label><input id="acct_name" value="${esc(state.profile?.full_name || '')}"></div>
+            <div class="field"><label>Phone</label><input id="acct_phone" value="${esc(state.profile?.phone || '')}"></div>
+            <div class="field"><label>Email</label><input value="${esc(state.user.email)}" disabled style="opacity:.6;"></div>
+            <button type="submit" class="btn btn-secondary">Save Changes</button>
+          </form>
+        </div>
+        <div class="summary-card">
+          <h3>Saved Addresses</h3>
+          ${(!addresses || addresses.length === 0) ? `<p style="font-size:13px;color:var(--ink-soft);">No addresses saved yet.</p>` :
+            addresses.map(a => `
+              <div style="border-bottom:1px solid var(--line);padding:9px 0;font-size:13px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+                <div>
+                  <strong>${esc(a.full_name)}</strong> · ${esc(a.phone)}<br>
+                  <span style="color:var(--ink-soft);">${esc(a.line1)}, ${esc(a.city)}, ${esc(a.state)} - ${esc(a.pincode)}</span>
+                </div>
+                <button onclick="deleteAddress('${a.id}')" style="background:none;border:none;color:var(--stamp-dark);font-size:18px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;" title="Delete address">🗑</button>
+              </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  // Note: #acct-grid responsive styles are in the main <style> block (Fix #7)
+}
+
+window.saveProfile = async function (e) {
+  e.preventDefault();
+  // Bug 1 fix: use acct_name/acct_phone to avoid ID clash with admin product form
+  const full_name = document.getElementById('acct_name').value;
+  const phone = document.getElementById('acct_phone').value;
+  // Fix #11: basic phone validation
+  if (phone && !/^\d{10}$/.test(phone.replace(/\s+/g, ''))) {
+    document.getElementById('acct-msg').innerHTML = `<div class="form-error">Please enter a valid 10-digit phone number.</div>`;
+    return;
+  }
+  // Fix #5: handle update errors instead of silently ignoring them
+  const { error } = await sb.from('profiles').update({ full_name, phone }).eq('id', state.user.id);
+  if (error) {
+    document.getElementById('acct-msg').innerHTML = `<div class="form-error">Could not save profile: ${esc(error.message)}</div>`;
+    return;
+  }
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', state.user.id).single();
+  state.profile = profile;
+  document.getElementById('acct-msg').innerHTML = `<div class="form-success">Profile updated!</div>`;
+};
+
+// Bug 7: delete address handler
+window.deleteAddress = async function (addressId) {
+  if (!confirm('Delete this address?')) return;
+  const { error } = await sb.from('addresses').delete().eq('id', addressId).eq('user_id', state.user.id);
+  if (error) { showToast('Could not delete address. Please try again.'); return; }
+  showToast('Address deleted.');
+  await renderAccount(document.getElementById('main-content'));
+};
+
+async function renderSearchPage(root, q) {
+  root.innerHTML = `
+    <div class="container">
+      <div class="page-head"><div class="breadcrumb"><a onclick="go({name:'home'})">Home</a> / Search</div><h1>Results for "${esc(q)}"</h1></div>
+      <div class="spinner-wrap">Searching…</div>
+    </div>`;
+
+  const term = (q || '').trim();
+  if (!term) {
+    root.querySelector('.container').innerHTML = `
+      <div class="page-head"><div class="breadcrumb"><a onclick="go({name:'home'})">Home</a> / Search</div><h1>Search</h1></div>
+      <div class="empty-state"><span class="emoji">🔍</span><h3>Type something to search</h3></div>`;
+    return;
+  }
+
+  // Fix #14: prevent concurrent search requests from racing
+  if (_searchInFlight) return;
+  _searchInFlight = true;
+
+  // Fix #4: escape special SQL LIKE chars to prevent filter injection
+  const safeTerm = term.replace(/[%_\\]/g, c => '\\' + c);
+
+  const { data, error } = await sb
+    .from('products')
+    .select('*')
+    .eq('is_active', true)
+    .or(`name.ilike.%${safeTerm}%,brand.ilike.%${safeTerm}%,description.ilike.%${safeTerm}%`);
+
+  _searchInFlight = false;
+
+  // Guard against the user navigating away while this request was in flight.
+  if (state.route.name !== 'search' || state.route.q !== q) return;
+
+  const products = data || [];
+  root.querySelector('.container').innerHTML = `
+    <div class="page-head"><div class="breadcrumb"><a onclick="go({name:'home'})">Home</a> / Search</div><h1>Results for "${esc(q)}"</h1></div>
+    ${error ? `<div class="form-error">Search failed: ${esc(error.message)}</div>` : ''}
+    ${products.length === 0
+      ? `<div class="empty-state"><span class="emoji">🔍</span><h3>No products found</h3><p>Try searching for something like "rice", "soap", or "milk".</p></div>`
+      : `<div class="product-grid" style="padding-bottom:40px;">${products.map(productCardHTML).join('')}</div>`}`;
+}
+
+function renderLogin(root) {
+  state._authMode = state._authMode || 'login';
+  state._authError = '';
+  state._authInfo = '';
+  renderLoginView(root);
+}
+
+function renderLoginView(root) {
+  const isLogin = state._authMode === 'login';
+  root.innerHTML = `
+    <div class="form-card">
+      <h2>${isLogin ? 'Welcome back' : 'Create your account'}</h2>
+      <p class="sub">${isLogin ? 'Log in to shop at JJ Mart' : 'Sign up to start shopping groceries'}</p>
+      ${state._authError ? `<div class="form-error">${esc(state._authError)}</div>` : ''}
+      ${state._authInfo ? `<div class="form-success">${esc(state._authInfo)}</div>` : ''}
+      <form onsubmit="handleAuth(event)">
+        ${!isLogin ? `
+          <div class="field"><label>Full Name</label><input id="su_name" placeholder="Your name"></div>
+          <div class="field"><label>Phone</label><input id="su_phone" placeholder="10-digit mobile number"></div>` : ''}
+        <div class="field"><label>Email</label><input id="au_email" type="email" placeholder="you@example.com"></div>
+        <div class="field"><label>Password</label><input id="au_password" type="password" placeholder="At least 6 characters"></div>
+        <button type="submit" class="btn btn-primary" id="auth-submit-btn" style="width:100%;">${isLogin ? 'Log In' : 'Sign Up'}</button>
+      </form>
+      <div class="form-switch">
+        ${isLogin ? `New to JJ Mart? <button onclick="switchAuthMode('signup')">Create an account</button>`
+                   : `Already have an account? <button onclick="switchAuthMode('login')">Log in</button>`}
+      </div>
+    </div>`;
+}
+
+window.switchAuthMode = function (mode) {
+  state._authMode = mode;
+  state._authError = '';
+  state._authInfo = '';
+  render();
+};
+
+window.handleAuth = async function (e) {
+  e.preventDefault();
+  const email = document.getElementById('au_email').value;
+  const password = document.getElementById('au_password').value;
+  const btn = document.getElementById('auth-submit-btn');
+  btn.disabled = true; btn.textContent = 'Please wait…';
+
+  if (state._authMode === 'signup') {
+    const full_name = document.getElementById('su_name').value;
+    const phone = document.getElementById('su_phone').value;
+    if (!full_name || !email || !password) {
+      state._authError = 'Please fill in name, email, and password.';
+      render();
+      return;
+    }
+    const { error } = await sb.auth.signUp({ email, password, options: { data: { full_name, phone } } });
+    if (error) { state._authError = error.message; render(); return; }
+    state._authMode = 'login';
+    state._authInfo = 'Account created! You can now log in.';
+    render();
+    return;
+  }
+
+  if (!email || !password) {
+    state._authError = 'Please enter your email and password.';
+    render();
+    return;
+  }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { state._authError = error.message; render(); return; }
+  await refreshSession();
+  go({ name: 'home' }, { replace: true });
+};
+
+/* ---------------- Shell (header/footer) ---------------- */
+/* ================= ADMIN PANEL ================= */
+async function renderAdmin(root) {
+  if (!state.user) {
+    root.innerHTML = `<div class="empty-state"><span class="emoji">🔒</span><h3>Please log in</h3><a class="btn btn-secondary" onclick="go({name:'login'})">Login</a></div>`;
+    return;
+  }
+  if (!state.profile?.is_admin) {
+    // Fix #13: This client-side check prevents rendering the UI, but security
+    // MUST be enforced by Supabase RLS policies on the products, categories,
+    // orders, and site_settings tables. Never rely on this check alone.
+    root.innerHTML = `<div class="empty-state"><span class="emoji">⛔</span><h3>Admin access required</h3><p>Your account doesn't have admin privileges.</p><a class="btn btn-secondary" onclick="go({name:'home'})">Back to Home</a></div>`;
+    return;
+  }
+
+  root.innerHTML = `<div class="container"><div class="spinner-wrap">Loading admin dashboard…</div></div>`;
+
+  const [{ data: products }, { data: categories }, { data: orders }, { data: settingsRows }] = await Promise.all([
+    sb.from('products').select('*, category:categories(name)').order('created_at', { ascending: false }),
+    sb.from('categories').select('*').order('sort_order'),
+    sb.from('orders').select('*, items:order_items(*)').order('created_at', { ascending: false }),
+    sb.from('site_settings').select('*'),
+  ]);
+
+  state._admin = {
+    tab: state._admin?.tab || 'products',
+    products: products || [],
+    categories: categories || [],
+    orders: orders || [],
+    settingsRows: settingsRows || [],
+    editingProduct: null,
+    productForm: null,
+    editingCategory: null,
+    categoryForm: null,
+  };
+  renderAdminView(root);
+}
+
+function adminProductFormDefaults() {
+  return { name: '', slug: '', description: '', category_id: '', brand: '', unit: '1 pc', mrp: '', price: '', stock: '', image_url: '', is_active: true, size_options: [] };
+}
+
+function slugify(s) {
+  return (s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function renderAdminView(root) {
+  const a = state._admin;
+  const tabs = [
+    ['products', `📦 Products (${a.products.length})`],
+    ['orders', `🧾 Orders (${a.orders.length})`],
+    ['categories', `🗂 Categories (${a.categories.length})`],
+    ['settings', `⚙️ Site Settings`],
+  ];
+
+  root.innerHTML = `
+    <div class="container">
+      <div class="page-head"><h1>Admin Dashboard</h1></div>
+      <div class="admin-layout" style="padding-bottom:50px;">
+        <div class="admin-nav">
+          ${tabs.map(([val, label]) => `<button class="${a.tab === val ? 'active' : ''}" onclick="setAdminTab('${val}')">${label}</button>`).join('')}
+        </div>
+        <div id="admin-content"></div>
+      </div>
+    </div>
+    <div id="admin-modal-root"></div>
+  `;
+  renderAdminTabContent();
+}
+
+function renderAdminTabContent() {
+  const a = state._admin;
+  const content = document.getElementById('admin-content');
+  if (!content) return;
+
+  if (a.tab === 'products') {
+    content.innerHTML = `
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="btn btn-primary" onclick="openNewProduct()">+ Add Product</button>
+      </div>
+      <div class="admin-table-wrap"><table class="admin-table">
+        <thead><tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          ${a.products.map(p => `
+            <tr>
+              <td><img src="${imgSrc(p.image_url)}" alt="" onerror="${imgOnError()}"></td>
+              <td>${esc(p.name)}<br><span style="color:var(--ink-soft);font-size:11px;">${esc(p.unit)}</span></td>
+              <td>${esc(p.category?.name || '—')}</td>
+              <td>₹${p.price}</td>
+              <td>${p.stock}</td>
+              <td><span style="color:${p.is_active ? 'var(--moss)' : 'var(--stamp)'};font-weight:700;font-size:12px;">${p.is_active ? 'Active' : 'Hidden'}</span></td>
+              <td>
+                <button class="icon-btn" onclick="openEditProduct('${p.id}')">Edit</button>
+                <button class="icon-btn" onclick="toggleProductActive('${p.id}')">${p.is_active ? 'Hide' : 'Show'}</button>
+                <button class="icon-btn" onclick="deleteProduct('${p.id}')">Delete</button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+  }
+
+  else if (a.tab === 'orders') {
+    content.innerHTML = `
+      <div class="admin-table-wrap"><table class="admin-table">
+        <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Update</th></tr></thead>
+        <tbody>
+          ${a.orders.map(o => `
+            <tr>
+              <td>#${o.id.slice(0, 8).toUpperCase()}<br><span style="color:var(--ink-soft);font-size:11px;">${new Date(o.created_at).toLocaleDateString()}</span></td>
+              <td>${esc(o.delivery_name)}<br><span style="color:var(--ink-soft);font-size:11px;">${esc(o.delivery_phone)}</span></td>
+              <td>${o.items.length} item(s)</td>
+              <td>₹${Number(o.total).toFixed(2)}</td>
+              <td><span class="order-status status-${o.status}">${o.status}</span></td>
+              <td>
+                <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding:4px 8px;border-radius:4px;border:1px solid var(--line);">
+                  ${['placed', 'packed', 'shipped', 'delivered', 'cancelled'].map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+                </select>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table></div>
+      ${a.orders.length === 0 ? `<p style="color:var(--ink-soft);font-size:13.5px;padding:20px 0;">No orders yet.</p>` : ''}`;
+  }
+
+  else if (a.tab === 'categories') {
+    content.innerHTML = `
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="btn btn-primary" onclick="openNewCategory()">+ Add Category</button>
+      </div>
+      <div class="admin-table-wrap"><table class="admin-table">
+        <thead><tr><th>Icon</th><th>Name</th><th>Slug</th><th>Products</th><th></th></tr></thead>
+        <tbody>
+          ${a.categories.map(c => `
+            <tr>
+              <td style="font-size:20px;">${c.icon || ''}</td>
+              <td>${esc(c.name)}</td>
+              <td style="color:var(--ink-soft);">${esc(c.slug)}</td>
+              <td>${a.products.filter(p => p.category_id === c.id).length}</td>
+              <td>
+                <button class="icon-btn" onclick="openEditCategory('${c.id}')">Edit</button>
+                <button class="icon-btn" onclick="deleteCategory('${c.id}')">Delete</button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+  }
+
+  else if (a.tab === 'settings') {
+    const get = key => (a.settingsRows.find(r => r.key === key) || {}).value || '';
+    content.innerHTML = `
+      <div class="summary-card" style="max-width:520px;">
+        <h3>Store Identity</h3>
+        <div class="field"><label>Store Name</label><input id="set_store_name" value="${esc(get('store_name'))}"></div>
+        <div class="field"><label>Tagline</label><input id="set_tagline" value="${esc(get('tagline'))}"></div>
+        <div class="field"><label>Support Email</label><input id="set_support_email" value="${esc(get('support_email'))}"></div>
+        <div class="field"><label>Support Hours</label><input id="set_support_hours" value="${esc(get('support_hours'))}"></div>
+      </div>
+      <div class="summary-card" style="max-width:520px;margin-top:18px;">
+        <h3>Delivery</h3>
+        <div class="field"><label>Free delivery threshold (₹)</label><input id="set_free_threshold" type="number" value="${esc(get('free_delivery_threshold'))}"></div>
+        <div class="field"><label>Delivery fee below threshold (₹)</label><input id="set_delivery_fee" type="number" value="${esc(get('delivery_fee'))}"></div>
+      </div>
+      <div class="summary-card" style="max-width:520px;margin-top:18px;">
+        <h3>Theme Colors</h3>
+        <div class="field"><label>Moss green (ratings, success)</label><input id="set_color_green" type="color" value="${esc(get('color_green') || '#3D6E4E')}" style="height:42px;padding:4px;"></div>
+        <div class="field"><label>Stamp red (prices, CTAs)</label><input id="set_color_orange" type="color" value="${esc(get('color_orange') || '#A23E2E')}" style="height:42px;padding:4px;"></div>
+        <div class="field"><label>Paper background</label><input id="set_color_cream" type="color" value="${esc(get('color_cream') || '#F1EBDD')}" style="height:42px;padding:4px;"></div>
+        <p style="font-size:11.5px;color:var(--ink-soft);margin-top:-6px;font-family:'JetBrains Mono',monospace;">Note: existing values saved before this update were in a different palette — picking new colors here overrides them.</p>
+      </div>
+      <button class="btn btn-primary" style="margin-top:18px;" onclick="saveSiteSettings()">Save All Settings</button>
+      <div id="settings-save-msg" style="margin-top:12px;"></div>`;
+  }
+}
+
+window.setAdminTab = function (tab) {
+  state._admin.tab = tab;
+  document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+  renderAdminTabContent();
+  document.querySelectorAll('.admin-nav button').forEach((b, i) => {
+    if (['products', 'orders', 'categories', 'settings'][i] === tab) b.classList.add('active');
+  });
+};
+
+/* ---- Products ---- */
+window.openNewProduct = function () {
+  state._admin.editingProduct = 'new';
+  state._admin.productForm = adminProductFormDefaults();
+  renderProductModal();
+};
+
+window.openEditProduct = function (id) {
+  const p = state._admin.products.find(p => p.id === id);
+  if (!p) return;
+  state._admin.editingProduct = id;
+  state._admin.productForm = {
+    name: p.name, slug: p.slug, description: p.description || '', category_id: p.category_id || '',
+    brand: p.brand || '', unit: p.unit, mrp: p.mrp, price: p.price, stock: p.stock, image_url: p.image_url || '', is_active: p.is_active,
+    size_options: Array.isArray(p.size_options) ? JSON.parse(JSON.stringify(p.size_options)) : []
+  };
+  renderProductModal();
+};
+
+function productImagePreviewHTML(imageUrl) {
+  if (imageUrl) {
+    return `
+      <div class="img-upload-preview">
+        <img src="${esc(imageUrl)}" alt="Product image preview">
+        <div class="img-upload-preview-actions">
+          <button type="button" class="btn btn-outline" onclick="triggerImageUpload()">Replace image</button>
+          <button type="button" class="icon-btn" onclick="removeProductImage()">Remove</button>
+        </div>
+      </div>
+      <input type="file" id="pf-image-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleImageFileSelect(event)">`;
+  }
+  return `
+    <button type="button" class="img-dropzone" onclick="triggerImageUpload()"
+      ondragover="event.preventDefault();event.stopPropagation();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="handleImageDrop(event)">
+      <span class="img-dropzone-icon">📷</span>
+      <span class="img-dropzone-text">Drag a photo here, or click to upload</span>
+      <span class="img-dropzone-sub">PNG or JPG, up to 8MB</span>
+    </button>
+    <input type="file" id="pf-image-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleImageFileSelect(event)">`;
+}
+
+window.handleImageFileSelect = function (e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  validateAndUploadImage(file);
+  e.target.value = ''; // allow re-selecting the same file later
+};
+
+window.handleImageDrop = function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer?.files?.[0];
+  if (!file) return;
+  validateAndUploadImage(file);
+};
+
+function validateAndUploadImage(file) {
+  if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
+    showToast('Please choose a PNG, JPG, or WEBP image.');
+    return;
+  }
+  if (file.size > 8000000) {
+    showToast('Image is too large — please use a file under 8MB.');
+    return;
+  }
+  uploadFileToCloudinary(file);
+}
+
+async function uploadFileToCloudinary(file) {
+  const wrap = document.getElementById('pf-image-preview-wrap');
+  if (wrap) wrap.innerHTML = `<div class="img-dropzone" style="cursor:default;"><span class="img-dropzone-icon">⏳</span><span class="img-dropzone-text">Uploading…</span></div>`;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  formData.append('folder', 'jjmart_products');
+
+  try {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST', body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok || !data.secure_url) {
+      throw new Error(data.error?.message || 'Upload failed');
+    }
+    document.getElementById('pf_image').value = data.secure_url;
+    if (wrap) wrap.innerHTML = productImagePreviewHTML(data.secure_url);
+    showToast('Image uploaded');
+  } catch (err) {
+    if (wrap) wrap.innerHTML = productImagePreviewHTML('');
+    showToast('Upload failed: ' + (err.message || 'please try again'));
+  }
+}
+
+window.triggerImageUpload = function () {
+  document.getElementById('pf-image-file-input')?.click();
+};
+
+window.removeProductImage = function () {
+  document.getElementById('pf_image').value = '';
+  document.getElementById('pf-image-preview-wrap').innerHTML = productImagePreviewHTML('');
+};
+
+function renderProductModal() {
+  const a = state._admin;
+  const f = a.productForm;
+  const modalRoot = document.getElementById('admin-modal-root');
+
+  function variantRowsHTML() {
+    if (!f.size_options || f.size_options.length === 0) return '';
+    return f.size_options.map((v, i) => `
+      <div class="variant-box" id="var-box-${i}">
+        <button class="remove-var" onclick="removeVariant(${i})" title="Remove">✕</button>
+        <div class="field" style="margin-bottom:8px;">
+          <label style="font-size:11px;">Label (e.g. 500g, 1kg, 2L)</label>
+          <input value="${esc(v.label)}" oninput="updateVariantField(${i},'label',this.value)" style="font-family:'JetBrains Mono',monospace;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div class="field"><label style="font-size:10px;">MRP ₹</label><input type="number" value="${esc(v.mrp)}" oninput="updateVariantField(${i},'mrp',this.value)"></div>
+          <div class="field"><label style="font-size:10px;">Price ₹</label><input type="number" value="${esc(v.price)}" oninput="updateVariantField(${i},'price',this.value)"></div>
+          <div class="field"><label style="font-size:10px;">Stock</label><input type="number" value="${esc(v.stock)}" oninput="updateVariantField(${i},'stock',this.value)"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  modalRoot.innerHTML = `
+    <div class="modal-overlay" onclick="closeAdminModal()">
+      <div class="modal-card" onclick="event.stopPropagation()">
+        <h3 style="margin-bottom:14px;">${a.editingProduct === 'new' ? 'Add Product' : 'Edit Product'}</h3>
+        <div class="field"><label>Name *</label><input id="pf_name" value="${esc(f.name)}"></div>
+        <div class="field"><label>Slug (auto if blank)</label><input id="pf_slug" value="${esc(f.slug)}" placeholder="auto-generated from name"></div>
+        <div class="field"><label>Category</label>
+          <select id="pf_category">
+            <option value="">— None —</option>
+            ${a.categories.map(c => `<option value="${c.id}" ${f.category_id === c.id ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Brand</label><input id="pf_brand" value="${esc(f.brand)}"></div>
+        <div class="field">
+          <label>Default Size / Unit</label>
+          <input id="pf_unit" value="${esc(f.unit)}" placeholder="e.g. 1 kg, 500 ml">
+          <span style="font-size:11px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;">This is the base size shown when no variant is selected.</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field"><label>Default MRP (₹) *</label><input id="pf_mrp" type="number" step="0.01" value="${esc(f.mrp)}"></div>
+          <div class="field"><label>Default Selling Price (₹) *</label><input id="pf_price" type="number" step="0.01" value="${esc(f.price)}"></div>
+        </div>
+        <div class="field"><label>Default Stock *</label><input id="pf_stock" type="number" value="${esc(f.stock)}"></div>
+
+        <div style="background:var(--paper-deep);border:1.5px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:16px;">📦</span>
+            <span style="font-weight:800;font-size:13.5px;">Size / Quantity Variants</span>
+            <span style="font-size:11.5px;color:var(--ink-soft);">(optional)</span>
+          </div>
+          <div id="pf-variant-list">${variantRowsHTML()}</div>
+          <button type="button" style="border:2px dashed var(--moss);background:none;color:var(--moss-dark);font-weight:800;font-size:13px;padding:9px 18px;border-radius:10px;cursor:pointer;width:100%;margin-bottom:8px;" onclick="addVariant()">+ Add size option</button>
+          <p style="font-size:11.5px;color:var(--ink-soft);margin:0;font-family:'JetBrains Mono',monospace;">e.g. 500g · 250g · 1 kg · 2 L — customers will see these as selectable pills on the product page.</p>
+        </div>
+
+        <div class="field">
+          <label>Product Image</label>
+          <div id="pf-image-preview-wrap">${productImagePreviewHTML(f.image_url)}</div>
+          <input type="hidden" id="pf_image" value="${esc(f.image_url)}">
+        </div>
+        <div class="field"><label>Description</label><textarea id="pf_desc" rows="3">${esc(f.description)}</textarea></div>
+        <div id="product-form-error"></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="saveProduct()">${a.editingProduct === 'new' ? 'Add Product' : 'Save Changes'}</button>
+          <button class="btn btn-outline" onclick="closeAdminModal()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+window.closeAdminModal = function () {
+  document.getElementById('admin-modal-root').innerHTML = '';
+  state._admin.editingProduct = null;
+  state._admin.editingCategory = null;
+};
+
+/* ---- Variant helpers ---- */
+window.addVariant = function () {
+  if (!state._admin.productForm.size_options) state._admin.productForm.size_options = [];
+  state._admin.productForm.size_options.push({ label: '', mrp: '', price: '', stock: '' });
+  // Re-render just the variant list
+  const list = document.getElementById('pf-variant-list');
+  if (list) {
+    const f = state._admin.productForm;
+    const i = f.size_options.length - 1;
+    const v = f.size_options[i];
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="variant-box" id="var-box-${i}">
+        <button class="remove-var" onclick="removeVariant(${i})" title="Remove">✕</button>
+        <div class="field" style="margin-bottom:8px;">
+          <label style="font-size:11px;">Label (e.g. 500g, 1kg, 2L)</label>
+          <input value="${esc(v.label)}" oninput="updateVariantField(${i},'label',this.value)" style="font-family:'JetBrains Mono',monospace;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div class="field"><label style="font-size:10px;">MRP ₹</label><input type="number" value="${esc(v.mrp)}" oninput="updateVariantField(${i},'mrp',this.value)"></div>
+          <div class="field"><label style="font-size:10px;">Price ₹</label><input type="number" value="${esc(v.price)}" oninput="updateVariantField(${i},'price',this.value)"></div>
+          <div class="field"><label style="font-size:10px;">Stock</label><input type="number" value="${esc(v.stock)}" oninput="updateVariantField(${i},'stock',this.value)"></div>
+        </div>
+      </div>`;
+    list.appendChild(div.firstElementChild);
+  }
+};
+
+window.removeVariant = function (i) {
+  state._admin.productForm.size_options.splice(i, 1);
+  renderProductModal(); // re-render to re-index
+};
+
+window.updateVariantField = function (i, field, value) {
+  if (state._admin.productForm.size_options[i]) {
+    state._admin.productForm.size_options[i][field] = value;
+  }
+};
+
+window.saveProduct = async function () {
+  const name = document.getElementById('pf_name').value.trim();
+  const mrp = Number(document.getElementById('pf_mrp').value);
+  const price = Number(document.getElementById('pf_price').value);
+  const stock = Number(document.getElementById('pf_stock').value);
+  const errBox = document.getElementById('product-form-error');
+
+  if (!name || !mrp || !price || stock === '' || isNaN(stock)) {
+    errBox.innerHTML = `<div class="form-error">Please fill in Name, MRP, Price, and Stock.</div>`;
+    return;
+  }
+
+  const payload = {
+    name,
+    slug: document.getElementById('pf_slug').value.trim() || slugify(name),
+    category_id: document.getElementById('pf_category').value || null,
+    brand: document.getElementById('pf_brand').value.trim(),
+    unit: document.getElementById('pf_unit').value.trim() || '1 pc',
+    mrp, price, stock,
+    image_url: document.getElementById('pf_image').value.trim(),
+    description: document.getElementById('pf_desc').value.trim(),
+    size_options: (state._admin.productForm.size_options || [])
+      .filter(v => v.label && v.label.trim())
+      .map(v => ({ label: v.label.trim(), mrp: Number(v.mrp) || 0, price: Number(v.price) || 0, stock: Number(v.stock) || 0 })),
+  };
+
+  const editingId = state._admin.editingProduct;
+  const { error } = editingId === 'new'
+    ? await sb.from('products').insert(payload)
+    : await sb.from('products').update(payload).eq('id', editingId);
+
+  if (error) {
+    errBox.innerHTML = `<div class="form-error">${esc(error.message)}</div>`;
+    return;
+  }
+
+  closeAdminModal();
+  showToast(editingId === 'new' ? 'Product added!' : 'Product updated!');
+  await refreshAdminTab('products');
+};
+
+window.toggleProductActive = async function (id) {
+  const p = state._admin.products.find(p => p.id === id);
+  if (!p) return;
+  await sb.from('products').update({ is_active: !p.is_active }).eq('id', id);
+  await refreshAdminTab('products');
+};
+
+window.deleteProduct = async function (id) {
+  if (!confirm('Delete this product permanently? This cannot be undone.')) return;
+  await sb.from('products').delete().eq('id', id);
+  showToast('Product deleted');
+  await refreshAdminTab('products');
+};
+
+/* ---- Categories ---- */
+window.openNewCategory = function () {
+  state._admin.editingCategory = 'new';
+  state._admin.categoryForm = { name: '', slug: '', icon: '🛒', sort_order: state._admin.categories.length + 1 };
+  renderCategoryModal();
+};
+
+window.openEditCategory = function (id) {
+  const c = state._admin.categories.find(c => c.id === id);
+  if (!c) return;
+  state._admin.editingCategory = id;
+  state._admin.categoryForm = { name: c.name, slug: c.slug, icon: c.icon || '', sort_order: c.sort_order || 0 };
+  renderCategoryModal();
+};
+
+function renderCategoryModal() {
+  const a = state._admin;
+  const f = a.categoryForm;
+  const modalRoot = document.getElementById('admin-modal-root');
+  modalRoot.innerHTML = `
+    <div class="modal-overlay" onclick="closeAdminModal()">
+      <div class="modal-card" onclick="event.stopPropagation()">
+        <h3 style="margin-bottom:14px;">${a.editingCategory === 'new' ? 'Add Category' : 'Edit Category'}</h3>
+        <div class="field"><label>Name *</label><input id="cf_name" value="${esc(f.name)}"></div>
+        <div class="field"><label>Slug (auto if blank)</label><input id="cf_slug" value="${esc(f.slug)}"></div>
+        <div class="field"><label>Icon (emoji)</label><input id="cf_icon" value="${esc(f.icon)}" placeholder="🛒"></div>
+        <div class="field"><label>Sort order</label><input id="cf_sort" type="number" value="${esc(f.sort_order)}"></div>
+        <div id="category-form-error"></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="saveCategory()">${a.editingCategory === 'new' ? 'Add Category' : 'Save Changes'}</button>
+          <button class="btn btn-outline" onclick="closeAdminModal()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+window.saveCategory = async function () {
+  const name = document.getElementById('cf_name').value.trim();
+  const errBox = document.getElementById('category-form-error');
+  if (!name) { errBox.innerHTML = `<div class="form-error">Name is required.</div>`; return; }
+
+  const payload = {
+    name,
+    slug: document.getElementById('cf_slug').value.trim() || slugify(name),
+    icon: document.getElementById('cf_icon').value.trim(),
+    sort_order: Number(document.getElementById('cf_sort').value) || 0,
+  };
+
+  const editingId = state._admin.editingCategory;
+  const { error } = editingId === 'new'
+    ? await sb.from('categories').insert(payload)
+    : await sb.from('categories').update(payload).eq('id', editingId);
+
+  if (error) { errBox.innerHTML = `<div class="form-error">${esc(error.message)}</div>`; return; }
+
+  closeAdminModal();
+  showToast(editingId === 'new' ? 'Category added!' : 'Category updated!');
+  await refreshAdminTab('categories');
+  await loadCategories(); // keep header nav in sync
+};
+
+window.deleteCategory = async function (id) {
+  if (!confirm('Delete this category? Products in it will become uncategorized.')) return;
+  await sb.from('categories').delete().eq('id', id);
+  showToast('Category deleted');
+  await refreshAdminTab('categories');
+  await loadCategories();
+};
+
+/* ---- Orders ---- */
+window.updateOrderStatus = async function (orderId, status) {
+  await sb.from('orders').update({ status }).eq('id', orderId);
+  showToast(`Order marked as ${status}`);
+  await refreshAdminTab('orders');
+};
+
+/* ---- Settings ---- */
+window.saveSiteSettings = async function () {
+  const updates = [
+    ['store_name', document.getElementById('set_store_name').value.trim() || 'JJ Mart'],
+    ['tagline', document.getElementById('set_tagline').value.trim()],
+    ['support_email', document.getElementById('set_support_email').value.trim()],
+    ['support_hours', document.getElementById('set_support_hours').value.trim()],
+    ['free_delivery_threshold', String(Number(document.getElementById('set_free_threshold').value) || 299)],
+    ['delivery_fee', String(Number(document.getElementById('set_delivery_fee').value) || 0)],
+    ['color_green', document.getElementById('set_color_green').value],
+    ['color_orange', document.getElementById('set_color_orange').value],
+    ['color_cream', document.getElementById('set_color_cream').value],
+  ];
+
+  const msgBox = document.getElementById('settings-save-msg');
+  for (const [key, value] of updates) {
+    const { error } = await sb.from('site_settings').upsert({ key, value, updated_at: new Date().toISOString() });
+    if (error) {
+      msgBox.innerHTML = `<div class="form-error">Failed to save "${key}": ${esc(error.message)}</div>`;
+      return;
+    }
+  }
+
+  await loadSettings();
+  msgBox.innerHTML = `<div class="form-success">All settings saved! Changes are live across the site now.</div>`;
+  showToast('Site settings updated');
+};
+
+/* Refresh just the data behind one admin tab, without leaving the admin page or doing a full app re-render. */
+async function refreshAdminTab(which) {
+  if (which === 'products') {
+    const { data } = await sb.from('products').select('*, category:categories(name)').order('created_at', { ascending: false });
+    state._admin.products = data || [];
+  } else if (which === 'categories') {
+    const { data } = await sb.from('categories').select('*').order('sort_order');
+    state._admin.categories = data || [];
+  } else if (which === 'orders') {
+    const { data } = await sb.from('orders').select('*, items:order_items(*)').order('created_at', { ascending: false });
+    state._admin.orders = data || [];
+  }
+  renderAdminTabContent();
+}
+
+/* ================= END ADMIN PANEL ================= */
+
+function mobileHeaderHTML() {
+  const count = cartCount();
+  const s = state.settings || {};
+  const storeName = s.store_name || 'JJ Mart';
+  const threshold = getFreeDeliveryThreshold();
+  return `
+    ${!isStoreOpen() ? `<div class="store-closed-banner" style="font-size:12px;padding:10px 14px;"><span class="closed-icon">🔒</span><span><strong>CLOSED</strong> · ${storeClosedMessage()}</span></div>` : ''}
+    <header class="m-header">
+      <div class="m-header-top">
+        <div class="m-promise">
+          <span class="m-promise-label">${esc(storeName)} in</span>
+          <span class="m-promise-time">~20 minutes <span class="m-pill">8AM–10PM</span></span>
+        </div>
+        <div class="m-header-icons">
+          <a onclick="go({name:'cart'})" class="m-icon-btn" aria-label="Cart">🛒${count > 0 ? `<span class="cart-badge">${count}</span>` : ''}</a>
+          <a onclick="go({name: state.user ? 'account' : 'login'})" class="m-icon-btn m-icon-round" aria-label="Account">${state.user ? esc((state.profile?.full_name || 'A')[0].toUpperCase()) : '👤'}</a>
+        </div>
+      </div>
+      <div class="m-locator">
+        <span class="m-locator-tag">DELIVER TO</span> ${esc(state.profile?.full_name || 'Guest')}${state.profile?.is_admin ? ' · <a onclick="go({name:\'admin\'})" style="color:var(--gold);">Admin ▾</a>' : ' ▾'}
+      </div>
+      <form class="m-search-bar" onsubmit="handleSearch(event)">
+        <span class="m-search-icon">🔍</span>
+        <input id="m-search-input" type="text" placeholder='Search "atta, rice, soap..."' oninput="debouncedLiveSearch(this.value)">
+      </form>
+      <nav class="m-cat-row">
+        <a class="m-cat-item ${state.route.name === 'home' ? 'active' : ''}" onclick="go({name:'home'})">
+          <span class="m-cat-icon-wrap">🛒</span><span>All</span>
+        </a>
+        ${state.categories.map(c => `
+          <a class="m-cat-item ${state.route.name === 'category' && state.route.slug === c.slug ? 'active' : ''}" onclick="go({name:'category',slug:'${c.slug}'})">
+            <span class="m-cat-icon-wrap">${c.icon}</span><span>${esc(c.name.split(' ')[0])}</span>
+          </a>`).join('')}
+      </nav>
+    </header>`;
+}
+
+function mobileTabBarHTML() {
+  const r = state.route.name;
+  const tabs = [
+    ['home', '🏠', 'Home'],
+    ['orders', '📦', 'Orders'],
+    ['category-grid', '🗂️', 'Categories'],
+    ['cart', '🛒', 'Cart'],
+    [state.user ? 'account' : 'login', '👤', 'Account'],
+  ];
+  return `
+    <nav class="m-tabbar">
+      ${tabs.map(([route, icon, label]) => `
+        <a class="m-tab ${r === route || (route === 'category-grid' && r === 'category') ? 'active' : ''}"
+           onclick="go({name:'${route === 'category-grid' ? 'categories' : route}'})">
+          <span class="m-tab-icon">${icon}</span><span>${label}</span>
+        </a>`).join('')}
+    </nav>`;
+}
+
+function mobileFloatingCartHTML() {
+  const count = cartCount();
+  if (count === 0 || state.route.name === 'cart' || state.route.name === 'checkout') return '';
+  const subtotal = cartSubtotal();
+  return `
+    <a class="m-float-cart" onclick="go({name:'cart'})">
+      <span class="m-float-cart-thumb">🛒</span>
+      <span class="m-float-cart-text">${count} item${count > 1 ? 's' : ''} <strong>· ₹${subtotal.toFixed(0)}</strong></span>
+      <span class="m-float-cart-arrow">View Cart ›</span>
+    </a>`;
+}
+
+function headerHTML() {
+  const count = cartCount();
+  const s = state.settings || {};
+  const storeName = s.store_name || 'JJ Mart';
+  const nameParts = storeName.split(/(?<=^.{2})/); // split after first 2 chars for the two-tone logo effect
+  const threshold = getFreeDeliveryThreshold();
+  return `
+    ${!isStoreOpen() ? `<div class="store-closed-banner"><span class="closed-icon">🔒</span><span>Store is currently <strong>CLOSED</strong> — ${storeClosedMessage()}</span><span class="closed-time">Hours: 8:00 AM – 10:00 PM IST</span></div>` : ''}
+    <div class="topbar"><div class="topbar-marquee"><span>🚚 Free delivery on orders above ₹${threshold}</span><span>🌿 Fresh & healthy groceries</span><span>⚡ Delivered to your door fast</span><span>🛒 Shop thousands of products</span><span>🌟 Best prices guaranteed</span><span>🚚 Free delivery on orders above ₹${threshold}</span><span>🌿 Fresh & healthy groceries</span><span>⚡ Delivered to your door fast</span><span>🛒 Shop thousands of products</span><span>🌟 Best prices guaranteed</span></div></div>
+    <header class="header">
+      <div class="header-inner container">
+        <a class="logo" onclick="go({name:'home'})"><span class="logo-icon">🛒</span>${esc(nameParts[0] || 'JJ')}<span>${esc(nameParts[1] || 'Mart')}</span> <small>FRESH</small></a>
+        <form class="search-bar" onsubmit="handleSearch(event)">
+          <input id="search-input" type="text" placeholder="Search for atta, rice, oil, soap..." aria-label="Search products" oninput="debouncedLiveSearch(this.value)">
+          <button type="submit" aria-label="Search">🔍</button>
+        </form>
+        <div class="header-actions">
+          ${state.user ? `
+            <a onclick="go({name:'orders'})">📦 Orders</a>
+            <a onclick="go({name:'account'})">👤 ${esc((state.profile?.full_name || 'Account').split(' ')[0])}</a>
+            ${state.profile?.is_admin ? `<a onclick="go({name:'admin'})">🛠️ Admin</a>` : ''}
+            <button onclick="handleLogout()">Logout</button>` : `
+            <a onclick="go({name:'login'})">👤 Login</a>`}
+          <a onclick="go({name:'cart'})">🛒 Cart ${count > 0 ? `<span class="cart-badge">${count}</span>` : ''}</a>
+        </div>
+      </div>
+      <nav class="category-nav">
+        <div class="category-nav-inner">
+          <a onclick="go({name:'home'})">All Products</a>
+          ${state.categories.map(c => `<a onclick="go({name:'category',slug:'${c.slug}'})">${c.icon} ${esc(c.name)}</a>`).join('')}
+        </div>
+      </nav>
+    </header>`;
+}
+
+
+function footerHTML() {
+  const s = state.settings || {};
+  const storeName = s.store_name || 'JJ Mart';
+  return `
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div><h4>${esc(storeName)}</h4><p>Your neighborhood superstore, online. Fresh groceries and daily essentials delivered fast.</p></div>
+          <div><h4>Shop</h4>
+            <a onclick="go({name:'home'})">All Products</a>
+            <a onclick="go({name:'category',slug:'fruits-vegetables'})">Fruits & Vegetables</a>
+            <a onclick="go({name:'category',slug:'staples'})">Staples</a>
+            <a onclick="go({name:'category',slug:'household-cleaning'})">Household</a>
+          </div>
+          <div><h4>Account</h4>
+            <a onclick="go({name:'orders'})">My Orders</a>
+            <a onclick="go({name:'account'})">My Account</a>
+            <a onclick="go({name:'cart'})">My Cart</a>
+          </div>
+          <div><h4>Help</h4><p>${esc(s.support_email || 'support@jjmart.example')}</p><p>${esc(s.support_hours || 'Mon–Sun, 8am–10pm')}</p></div>
+        </div>
+        <div class="footer-bottom">© 2026 ${esc(storeName)} Superstore. Built as a demo project — not a real store.</div>
+      </div>
+    </footer>`;
+}
+
+window.handleSearch = function (e) {
+  e.preventDefault();
+  const input = e.target.querySelector('input[type="text"]') || e.target.querySelector('input');
+  const q = (input?.value || '').trim();
+  if (q) go({ name: 'search', q });
+};
+
+window.handleLogout = async function () {
+  await sb.auth.signOut();
+  await refreshSession();
+  go({ name: 'home' }, { replace: true });
+};
+
+/* ---------------- Main render ---------------- */
+async function render() {
+  const app = document.getElementById('app');
+  const r = state.route;
+  let bodyHTML = `<main id="main-content" style="flex:1;"></main>`;
+
+  app.innerHTML = `
+    <div style="min-height:100vh;display:flex;flex-direction:column;">
+      ${headerHTML()}
+      ${mobileHeaderHTML()}
+      ${bodyHTML}
+      ${footerHTML()}
+      ${mobileTabBarHTML()}
+      ${mobileFloatingCartHTML()}
+    </div>
+    ${state.toast ? `<div class="toast" role="alert" aria-live="polite">${esc(state.toast)}</div>` : ''}
+    ${state.showLoginPrompt ? loginPromptOverlayHTML() : ''}
+  `;
+
+  const main = document.getElementById('main-content');
+
+  // Bug 3 fix: reset search box value whenever the route changes
+  ['search-input', 'm-search-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && r.name !== 'search') el.value = '';
+    else if (el && r.name === 'search') el.value = r.q || '';
+  });
+
+  if (r.name === 'home') await renderHome(main);
+  else if (r.name === 'category') await renderCategory(main, r.slug);
+  else if (r.name === 'product') await renderProduct(main, r.slug);
+  else if (r.name === 'cart') renderCart(main);
+  else if (r.name === 'checkout') await renderCheckout(main);
+  else if (r.name === 'login') renderLogin(main);
+  else if (r.name === 'orders') await renderOrders(main, r.placed);
+  else if (r.name === 'account') await renderAccount(main);
+  else if (r.name === 'search') await renderSearchPage(main, r.q);
+  else if (r.name === 'admin') await renderAdmin(main);
+  else if (r.name === 'categories') renderCategoriesGrid(main);
+  else main.innerHTML = `<div class="empty-state"><span class="emoji">🤔</span><h3>Page not found</h3><a class="btn btn-secondary" onclick="go({name:'home'})">Back to home</a></div>`;
+}
+
+function loginPromptOverlayHTML() {
+  return `
+    <div class="modal-overlay" onclick="closeLoginPrompt()">
+      <div class="modal-card" onclick="event.stopPropagation()" style="text-align:center;">
+        <span style="font-size:38px;">🔒</span>
+        <h3 style="margin:10px 0;">Log in to continue</h3>
+        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:16px;">Please log in or create an account to add items to your cart.</p>
+        <a class="btn btn-primary" style="width:100%;" onclick="goToLoginFromPrompt()">Log In / Sign Up</a>
+      </div>
+    </div>`;
+}
+
+// The login prompt is a transient overlay, not a navigable page — it never
+// participates in routing. While it's open, a single back-button press
+// closes it (via a one-time popstate listener) instead of leaving the app.
+function showLoginPrompt() {
+  state.showLoginPrompt = true;
+  render();
+  history.pushState({ loginPrompt: true, route: state.route }, '', location.hash);
+  window.addEventListener('popstate', closeLoginPromptFromBack, { once: true });
+}
+
+function closeLoginPromptFromBack() {
+  state.showLoginPrompt = false;
+  render();
+}
+
+window.closeLoginPrompt = function () {
+  if (!state.showLoginPrompt) return;
+  state.showLoginPrompt = false;
+  window.removeEventListener('popstate', closeLoginPromptFromBack);
+  render();
+  // Undo the extra history entry we pushed when opening, without navigating away.
+  history.back();
+};
+
+// Proceeding to the login page: clear the prompt and navigate to login,
+// replacing the placeholder history entry the prompt pushed (rather than
+// adding a new one on top of it, which would leave an extra back-stop).
+window.goToLoginFromPrompt = function () {
+  state.showLoginPrompt = false;
+  window.removeEventListener('popstate', closeLoginPromptFromBack);
+  go({ name: 'login' }, { replace: true });
+};
+
+window.updateGuestQty = function (productId, qty) {
+  const item = state.guestCart.find(i => i.productId === productId);
+  if (!item) return;
+  if (qty <= 0) { state.guestCart = state.guestCart.filter(i => i.productId !== productId); }
+  else { item.quantity = qty; }
+  saveGuestCart();
+  render();
+};
+window.removeGuestItem = function (productId) {
+  state.guestCart = state.guestCart.filter(i => i.productId !== productId);
+  saveGuestCart();
+  render();
+};
+
+/* expose functions used inline */
+window.go = go;
+window.addToCart = addToCart;
+window.updateQty = updateQty;
+window.removeItem = removeItem;
+
+/* ---------------- Boot ---------------- */
+(async function boot() {
+  loadGuestCart(); // Fix #18: load guest cart from localStorage on startup
+  document.getElementById('app').innerHTML = `<div class="spinner-wrap">Loading JJ Mart…</div>`;
+  history.replaceState({ route: state.route }, '', '');
+  await Promise.all([loadCategories(), loadSettings(), refreshSession()]);
+  sb.auth.onAuthStateChange(async (_event, session) => {
+    state.user = session?.user || null;
+    if (state.user) {
+      const { data: profile } = await sb.from('profiles').select('*').eq('id', state.user.id).single();
+      state.profile = profile;
+    } else {
+      state.profile = null;
+    }
+    await loadCart();
+    // Fix #18: merge any guest cart items into the logged-in cart
+    if (state.user) await mergeGuestCartOnLogin();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
